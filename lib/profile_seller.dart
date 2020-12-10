@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hehe/update_profile.dart';
 import 'home_seller.dart';
 
 class SellerProfilePage extends StatelessWidget {
@@ -77,7 +78,10 @@ class SellerProfilePage extends StatelessWidget {
                 color: Colors.brown[300],
                 shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => UpdateProfile()));
+                },
                 child: Container(
                   child: Text('Ubah Profil',
                       style:

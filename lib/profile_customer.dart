@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_customer.dart';
+import 'update_profile.dart';
 
 class customerProfilePage extends StatelessWidget {
   @override
@@ -77,7 +78,10 @@ class customerProfilePage extends StatelessWidget {
                 color: Colors.brown[300],
                 shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => UpdateProfile()));
+                },
                 child: Container(
                   child: Text('Ubah Profil',
                       style:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hehe/status_history.dart';
 import 'profile_customer.dart';
 import 'login.dart';
 
@@ -47,7 +48,12 @@ class CustomerHomePage extends StatelessWidget {
                   size: 28.0,
                   color: Colors.green,
                 ),
-                onPressed: null),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => StatusAndHistory()));
+                }),
             IconButton(
                 padding: EdgeInsets.fromLTRB(0, 40, 50, 20),
                 icon: Icon(
