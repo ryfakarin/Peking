@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1025852823192",
+    "project_id": "peking-90c98",
+    "storage_bucket": "peking-90c98.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1025852823192:android:4f761a52f1dd7bf4c422ed",
+        "android_client_info": {
+          "package_name": "com.peking.hehe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1025852823192-n35ncrf5kd4i7m1ntn27bh1rcfafkc3j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqpPBqrF86TTzzFXHseAhByKGUxufRENc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1025852823192-n35ncrf5kd4i7m1ntn27bh1rcfafkc3j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
