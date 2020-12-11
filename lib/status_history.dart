@@ -7,21 +7,18 @@ class StatusAndHistory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // appBar: new AppBar(
-
-        // ),
         body: DefaultTabController(
       length: 2,
       child: MaterialApp(
         home: Scaffold(
           appBar: new AppBar(
             leading: null,
-            toolbarHeight: 250,
+            toolbarHeight: 150,
             backgroundColor: Colors.transparent,
             elevation: 0.0,
             actions: <Widget>[
               IconButton(
-                  padding: EdgeInsets.fromLTRB(0, 25, 25, 0),
+                  padding: EdgeInsets.fromLTRB(0, 20, 25, 0),
                   icon: Icon(
                     Icons.arrow_back,
                     size: 28.0,
@@ -40,7 +37,7 @@ class StatusAndHistory extends StatelessWidget {
                         image: AssetImage('assets/images/logo.PNG'))),
               ),
               Container(
-                  padding: EdgeInsets.fromLTRB(0, 50, 110, 20),
+                  padding: EdgeInsets.fromLTRB(0, 40, 110, 20),
                   child: Text('Peking',
                       style: TextStyle(
                           color: Colors.green,
@@ -65,19 +62,24 @@ class StatusAndHistory extends StatelessWidget {
                   onPressed: null),
             ],
             bottom: TabBar(
+              labelPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
               onTap: (index) {},
               indicatorColor: Colors.green,
-              labelStyle: TextStyle(fontSize: 20.0), //For Selected tab
+              labelColor: Colors.green,
+              labelStyle: TextStyle(fontSize: 18.0), //For Selected tab
               unselectedLabelStyle: TextStyle(
-                  fontSize: 18.0, color: Colors.green), //For Un-selected Tabs
-              tabs: [Tab(text: 'Pembeli'), Tab(text: 'Penjual')],
+                  fontSize: 16.0, color: Colors.green), //For Un-selected Tabs
+              tabs: [
+                Tab(text: 'Status Pemesanan'),
+                Tab(text: 'Histori Pemesanan')
+              ],
             ),
           ),
           body: TabBarView(
             children: [
               Center(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
+                  padding: EdgeInsets.fromLTRB(30, 10, 30, 0),
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -153,7 +155,7 @@ class StatusAndHistory extends StatelessWidget {
               ),
               Center(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
+                  padding: EdgeInsets.fromLTRB(30, 10, 30, 0),
                   child: Column(
                     children: <Widget>[
                       Container(

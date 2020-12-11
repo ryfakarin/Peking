@@ -15,7 +15,7 @@ class CustomerHomePage extends StatelessWidget {
           elevation: 0.0,
           actions: <Widget>[
             IconButton(
-                padding: EdgeInsets.fromLTRB(0, 25, 25, 0),
+                padding: EdgeInsets.fromLTRB(0, 20, 25, 0),
                 icon: Icon(
                   Icons.arrow_back,
                   size: 28.0,

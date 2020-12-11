@@ -13,11 +13,12 @@ class SignUpPage extends StatelessWidget {
           child: MaterialApp(
             home: Scaffold(
               appBar: new AppBar(
+                toolbarHeight: 130,
                 leading: null,
                 backgroundColor: Colors.lime[700],
                 actions: <Widget>[
                   IconButton(
-                    padding: EdgeInsets.fromLTRB(0, 0, 380, 0),
+                    padding: EdgeInsets.fromLTRB(0, 20, 380, 0),
                     icon: Icon(
                       Icons.arrow_back,
                       color: Colors.white,
