@@ -17,17 +17,21 @@ class SignUpPage extends StatelessWidget {
                 leading: null,
                 backgroundColor: Colors.lime[700],
                 actions: <Widget>[
-                  IconButton(
-                    padding: EdgeInsets.fromLTRB(0, 20, 380, 0),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0, 25, 330, 0),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                      ),
+                      alignment: Alignment.centerLeft,
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()));
+                      },
                     ),
-                    alignment: Alignment.centerLeft,
-                    onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => LoginPage()));
-                    },
                   )
                 ],
                 bottom: TabBar(

@@ -13,7 +13,6 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
-		9AACF3152587C5C800A64D1D /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 97C147021CF9000F007C117D /* Info.plist */; };
 		9AACF3172587C66A00A64D1D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9AACF3162587C66A00A64D1D /* GoogleService-Info.plist */; };
 		E58595E2D2C57800B1E9071C /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A85E6C5F13C0B00B5395D8C0 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
@@ -195,7 +194,6 @@
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
-				9AACF3152587C5C800A64D1D /* Info.plist in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				9AACF3172587C66A00A64D1D /* GoogleService-Info.plist in Resources */,
 			);

@@ -11,7 +11,7 @@ class LoginPage extends StatelessWidget {
       body: Container(
         height: 1000,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(50, 180, 50, 0),
+          padding: EdgeInsets.fromLTRB(50, 120, 50, 0),
           child: Column(
             children: <Widget>[
               Container(
@@ -29,15 +29,15 @@ class LoginPage extends StatelessWidget {
                               image: AssetImage('assets/images/logo.PNG'))),
                     ),
                     Container(
-                      padding: EdgeInsets.fromLTRB(0, 40, 0, 10),
+                      padding: EdgeInsets.fromLTRB(0, 20, 0, 10),
                       child: Text('Log In',
                           style: TextStyle(
                               color: Colors.orange[400],
-                              fontSize: 40,
+                              fontSize: 36,
                               fontWeight: FontWeight.bold)),
                     ),
                     Container(
-                      padding: EdgeInsets.all(8),
+                      padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
                       decoration: BoxDecoration(
                           border: Border(
                               bottom: BorderSide(color: Colors.orange[200]))),
@@ -53,7 +53,7 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(8),
+                      padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                       decoration: BoxDecoration(
                           border: Border(
                               bottom: BorderSide(color: Colors.orange[200]))),
@@ -68,7 +68,7 @@ class LoginPage extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 30),
+              SizedBox(height: 40),
               RaisedButton(
                 textColor: Colors.white,
                 padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
