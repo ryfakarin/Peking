@@ -13,7 +13,7 @@ class SignUpPage extends StatelessWidget {
           child: MaterialApp(
             home: Scaffold(
               appBar: new AppBar(
-                toolbarHeight: 130,
+                toolbarHeight: 110,
                 leading: null,
                 backgroundColor: Colors.lime[700],
                 actions: <Widget>[

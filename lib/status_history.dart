@@ -13,12 +13,12 @@ class StatusAndHistory extends StatelessWidget {
         home: Scaffold(
           appBar: new AppBar(
             leading: null,
-            toolbarHeight: 150,
+            toolbarHeight: 160,
             backgroundColor: Colors.transparent,
             elevation: 0.0,
             actions: <Widget>[
               IconButton(
-                  padding: EdgeInsets.fromLTRB(0, 20, 25, 0),
+                  padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                   icon: Icon(
                     Icons.arrow_back,
                     size: 28.0,
@@ -29,7 +29,7 @@ class StatusAndHistory extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => LoginPage()));
                   }),
               Container(
-                margin: EdgeInsets.fromLTRB(0, 15, 10, 0),
+                margin: EdgeInsets.fromLTRB(0, 25, 10, 0),
                 height: 45,
                 width: 45,
                 decoration: BoxDecoration(
@@ -37,7 +37,7 @@ class StatusAndHistory extends StatelessWidget {
                         image: AssetImage('assets/images/logo.PNG'))),
               ),
               Container(
-                  padding: EdgeInsets.fromLTRB(0, 40, 110, 20),
+                  padding: EdgeInsets.fromLTRB(0, 52, 80, 20),
                   child: Text('Peking',
                       style: TextStyle(
                           color: Colors.green,
@@ -45,7 +45,7 @@ class StatusAndHistory extends StatelessWidget {
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.bold))),
               IconButton(
-                  padding: EdgeInsets.fromLTRB(0, 40, 20, 20),
+                  padding: EdgeInsets.fromLTRB(0, 50, 0, 20),
                   icon: Icon(
                     Icons.history,
                     size: 28.0,
@@ -53,7 +53,7 @@ class StatusAndHistory extends StatelessWidget {
                   ),
                   onPressed: null),
               IconButton(
-                  padding: EdgeInsets.fromLTRB(0, 40, 50, 20),
+                  padding: EdgeInsets.fromLTRB(0, 50, 50, 20),
                   icon: Icon(
                     Icons.account_circle,
                     size: 30.0,
@@ -62,7 +62,7 @@ class StatusAndHistory extends StatelessWidget {
                   onPressed: null),
             ],
             bottom: TabBar(
-              labelPadding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+              labelPadding: EdgeInsets.fromLTRB(20, 10, 20, 0),
               onTap: (index) {},
               indicatorColor: Colors.green,
               labelColor: Colors.green,
