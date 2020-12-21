@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hehe/services/auth.dart';
 import 'signup.dart';
 import 'home_customer.dart';
 
 class LoginPage extends StatelessWidget {
+  final AuthService _authService = AuthService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +79,14 @@ class LoginPage extends StatelessWidget {
                 color: Colors.orangeAccent[400],
                 shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
-                onPressed: () {
+                onPressed: () async {
+                  dynamic result = await _authService.signInAnon();
+                  if (result == null) {
+                    print('error sign in');
+                  } else {
+                    print('signed in');
+                    print(result.uid);
+                  }
                   Navigator.push(
                       context,
                       MaterialPageRoute(

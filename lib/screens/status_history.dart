@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
-import 'home_customer.dart';
-import 'home_seller.dart';
+import 'package:hehe/screens/login.dart';
+import 'package:hehe/screens/home_customer.dart';
+import 'package:hehe/screens/home_seller.dart';
 
 class StatusAndHistory extends StatelessWidget {
   @override
@@ -66,9 +66,9 @@ class StatusAndHistory extends StatelessWidget {
               onTap: (index) {},
               indicatorColor: Colors.green,
               labelColor: Colors.green,
-              labelStyle: TextStyle(fontSize: 18.0), //For Selected tab
+              labelStyle: TextStyle(fontSize: 16.0), //For Selected tab
               unselectedLabelStyle: TextStyle(
-                  fontSize: 16.0, color: Colors.green), //For Un-selected Tabs
+                  fontSize: 14.0, color: Colors.green), //For Un-selected Tabs
               tabs: [
                 Tab(text: 'Status Pemesanan'),
                 Tab(text: 'Histori Pemesanan')

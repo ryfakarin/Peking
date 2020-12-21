@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hehe/profile_seller.dart';
-import 'package:hehe/status_history.dart';
+import 'package:hehe/screens/profile_seller.dart';
+import 'package:hehe/screens/status_history.dart';
+import 'package:hehe/services/auth.dart';
 import 'login.dart';
 
 class SellerHomePage extends StatelessWidget {
+  final AuthService _authService = AuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(

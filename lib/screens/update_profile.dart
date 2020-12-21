@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'profile_customer.dart';
-import 'profile_seller.dart';
+import 'package:hehe/screens/profile_customer.dart';
+import 'package:hehe/screens/profile_seller.dart';
 
 class UpdateProfile extends StatelessWidget {
   @override
