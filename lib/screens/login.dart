@@ -4,14 +4,36 @@ import 'package:hehe/services/auth.dart';
 import 'signup.dart';
 import 'home_customer.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
+  var _formKey = GlobalKey<FormState>();
+
+  String phoneNumber = '';
+  String password = '';
+
+  bool validate() {
+    final form = _formKey.currentState;
+    form.save();
+    if (form.validate()) {
+      form.save();
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Form(
+        key: _formKey,
         child: Padding(
           padding: EdgeInsets.fromLTRB(50, 120, 50, 0),
           child: Column(
@@ -44,6 +66,10 @@ class LoginPage extends StatelessWidget {
                           border: Border(
                               bottom: BorderSide(color: Colors.orange[200]))),
                       child: TextFormField(
+                        onChanged: (val) {
+                          setState(() => phoneNumber = val);
+                        },
+                        validator: emptyValidator.emptyValidate,
                         keyboardType: TextInputType.number,
                         inputFormatters: <TextInputFormatter>[
                           FilteringTextInputFormatter.digitsOnly
@@ -60,6 +86,10 @@ class LoginPage extends StatelessWidget {
                           border: Border(
                               bottom: BorderSide(color: Colors.orange[200]))),
                       child: TextFormField(
+                        onChanged: (val) {
+                          setState(() => password = val);
+                        },
+                        validator: emptyValidator.emptyValidate,
                         obscureText: true,
                         decoration: InputDecoration(
                             border: InputBorder.none,
@@ -78,17 +108,13 @@ class LoginPage extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
                 onPressed: () async {
-                  dynamic result = await _authService.signInAnon();
-                  if (result == null) {
-                    print('error sign in');
-                  } else {
-                    print('signed in');
-                    print(result.uid);
+                  if(validate()){
+                    // check pembeli apa penjual
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CustomerHomePage()));
                   }
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CustomerHomePage()));
                 },
                 child: Container(
                   child: Text('Log In',
@@ -124,5 +150,14 @@ class LoginPage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class emptyValidator {
+  static String emptyValidate(String value) {
+    if (value.isEmpty) {
+      return "Lengkapi Kolom";
+    }
+    return null;
   }
 }
