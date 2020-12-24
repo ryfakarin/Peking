@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hehe/services/auth.dart';
@@ -12,8 +11,7 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Container(
-        height: 1000,
+      body: Form(
         child: Padding(
           padding: EdgeInsets.fromLTRB(50, 120, 50, 0),
           child: Column(

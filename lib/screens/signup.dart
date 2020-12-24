@@ -2,8 +2,35 @@ import 'package:flutter/material.dart';
 import 'login.dart';
 import 'home_customer.dart';
 import 'home_seller.dart';
+import 'package:hehe/services/auth.dart';
+import 'package:international_phone_input/international_phone_input.dart';
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+
+  final AuthService _authService = AuthService();
+
+  int tipePenjual = 0;
+  String _phoneNumber = "";
+
+  setTipePenjual(int value) {
+    setState(() {
+      tipePenjual = value;
+    });
+  }
+
+  void onPhoneNumberChange(
+      String number, String internationalizedPhoneNumber, String isoCode) {
+    setState(() {
+      _phoneNumber = internationalizedPhoneNumber;
+      print(_phoneNumber);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,17 +64,18 @@ class SignUpPage extends StatelessWidget {
                 bottom: TabBar(
                   onTap: (index) {},
                   indicatorColor: Colors.white,
-                  labelStyle: TextStyle(fontSize: 20.0), //For Selected tab
-                  unselectedLabelStyle:
-                      TextStyle(fontSize: 18.0), //For Un-selected Tabs
+                  labelStyle: TextStyle(fontSize: 20.0),
+                  //For Selected tab
+                  unselectedLabelStyle: TextStyle(fontSize: 18.0),
+                  //For Un-selected Tabs
                   tabs: [Tab(text: 'Pembeli'), Tab(text: 'Penjual')],
                 ),
               ),
               body: TabBarView(
                 children: [
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
+                  SingleChildScrollView(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(20, 10, 20, 0),
                       child: Column(
                         children: <Widget>[
                           Container(
@@ -56,7 +84,7 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
+                            child: TextFormField(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Nama Lengkap',
@@ -70,13 +98,21 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Nomor Telepon',
-                                  hintStyle:
-                                      TextStyle(color: Colors.grey[400])),
-                            ),
+                            child: InternationalPhoneInput(
+                                decoration: InputDecoration.collapsed(
+                                    hintText: '(416) 123-4567'),
+                                onPhoneNumberChange: onPhoneNumberChange,
+                                initialPhoneNumber: _phoneNumber,
+                                initialSelection: 'ID',
+                                enabledCountries: ['+62'],
+                                showCountryFlags: false),
+                            // TextFormField(
+                            //   decoration: InputDecoration(
+                            //       border: InputBorder.none,
+                            //       hintText: 'Nomor Telepon',
+                            //       hintStyle:
+                            //           TextStyle(color: Colors.grey[400])),
+                            // ),
                           ),
                           Container(
                             padding: EdgeInsets.all(8),
@@ -84,7 +120,7 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
+                            child: TextFormField(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Kata Sandi',
@@ -98,7 +134,7 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
+                            child: TextFormField(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Ulangi Kata Sandi',
@@ -113,7 +149,14 @@ class SignUpPage extends StatelessWidget {
                             color: Colors.lime[700],
                             shape: RoundedRectangleBorder(
                                 borderRadius: new BorderRadius.circular(30.0)),
-                            onPressed: () {
+                            onPressed: () async {
+                              var result = await _authService.createUserWithPhone(_phoneNumber, context);
+
+                              if (_phoneNumber == "" || result == 'error') {
+                                setState(() {
+                                  print("No longer valid");
+                                });
+                              }
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -131,7 +174,7 @@ class SignUpPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Center(
+                  Form(
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
                       child: Column(
@@ -142,7 +185,7 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
+                            child: TextFormField(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Nama Lengkap',
@@ -156,13 +199,21 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Nomor Telepon',
-                                  hintStyle:
-                                      TextStyle(color: Colors.grey[400])),
-                            ),
+                            child: InternationalPhoneInput(
+                                decoration: InputDecoration.collapsed(
+                                    hintText: '(416) 123-4567'),
+                                onPhoneNumberChange: onPhoneNumberChange,
+                                initialPhoneNumber: _phoneNumber,
+                                initialSelection: 'IDN',
+                                enabledCountries: ['+62'],
+                                showCountryFlags: false),
+                            // TextFormField(
+                            //   decoration: InputDecoration(
+                            //       border: InputBorder.none,
+                            //       hintText: 'Nomor Telepon',
+                            //       hintStyle:
+                            //           TextStyle(color: Colors.grey[400])),
+                            // ),
                           ),
                           Container(
                             padding: EdgeInsets.all(8),
@@ -170,7 +221,7 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
+                            child: TextFormField(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Kata Sandi',
@@ -184,7 +235,7 @@ class SignUpPage extends StatelessWidget {
                                 border: Border(
                                     bottom:
                                         BorderSide(color: Colors.lightGreen))),
-                            child: TextField(
+                            child: TextFormField(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Ulangi Kata Sandi',
@@ -193,23 +244,34 @@ class SignUpPage extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.fromLTRB(0, 20, 50, 0),
+                            padding: EdgeInsets.fromLTRB(0, 0, 50, 0),
                             alignment: Alignment.bottomLeft,
                             width: 350,
                             child: Column(
                               children: <Widget>[
-                                ListTile(
+                                RadioListTile(
+                                  value: 1,
+                                  groupValue: tipePenjual,
+                                  activeColor: Colors.lightGreen,
                                   title: const Text('Menetap',
                                       style: TextStyle(
                                           color: Colors.grey, fontSize: 16)),
-                                  leading: Radio(value: 'Menetap'),
+                                  onChanged: (val) {
+                                    setTipePenjual(val);
+                                    print(tipePenjual);
+                                  },
                                 ),
-                                ListTile(
-                                  title: const Text('Keliling',
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 16)),
-                                  leading: Radio(value: 'Keliling'),
-                                )
+                                RadioListTile(
+                                    value: 2,
+                                    groupValue: tipePenjual,
+                                    activeColor: Colors.lightGreen,
+                                    title: const Text('Keliling',
+                                        style: TextStyle(
+                                            color: Colors.grey, fontSize: 16)),
+                                    onChanged: (val) {
+                                      setTipePenjual(val);
+                                      print(tipePenjual);
+                                    })
                               ],
                             ),
                           ),
