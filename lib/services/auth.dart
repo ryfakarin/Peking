@@ -6,7 +6,7 @@ import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_customer.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   // create user obj based on FirebaseUser
   UserModel _userFromFirebaseUser(FirebaseUser user) {
@@ -17,6 +17,9 @@ class AuthService {
   Stream<UserModel> get user {
     return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
   }
+  // Stream<String> get onAuthStateChanged => _auth.onAuthStateChanged.map(
+  //     (FirebaseUser user) => user?.uid,
+  // );
 
   // sign in without account
   Future signInAnon() async {
@@ -33,7 +36,7 @@ class AuthService {
   // sign in with phone number
 
   // register with phone number
-  Future createUserWithPhone(String phone, BuildContext context) {
+  Future verificationUserWithPhone(String phone, BuildContext context) {
     _auth.verifyPhoneNumber(
         phoneNumber: phone,
         timeout: Duration(seconds: 0),
@@ -100,6 +103,16 @@ class AuthService {
           print(verificationId);
           print("Timeout");
         });
+  }
+
+  // get UID
+  Future<String> getCurrentUID() async {
+    return (await _auth.currentUser()).uid;
+  }
+
+  // get current user
+  Future getCurrentUser() async {
+    return await _auth.currentUser();
   }
 
   // sign out

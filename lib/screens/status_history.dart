@@ -66,9 +66,11 @@ class StatusAndHistory extends StatelessWidget {
               onTap: (index) {},
               indicatorColor: Colors.green,
               labelColor: Colors.green,
-              labelStyle: TextStyle(fontSize: 16.0), //For Selected tab
-              unselectedLabelStyle: TextStyle(
-                  fontSize: 14.0, color: Colors.green), //For Un-selected Tabs
+              labelStyle: TextStyle(fontSize: 16.0),
+              //For Selected tab
+              unselectedLabelStyle:
+                  TextStyle(fontSize: 14.0, color: Colors.green),
+              //For Un-selected Tabs
               tabs: [
                 Tab(text: 'Status Pemesanan'),
                 Tab(text: 'Histori Pemesanan')

@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/login.dart';
 import 'package:hehe/services/auth.dart';
+import 'package:provider/provider.dart';
 import 'home_customer.dart';
 import 'package:hehe/screens/update_profile.dart';
 
-class customerProfilePage extends StatelessWidget {
-  final AuthService _authService = AuthService();
+class customerProfilePage extends StatefulWidget {
+  @override
+  _customerProfilePageState createState() => _customerProfilePageState();
+}
+
+class _customerProfilePageState extends State<customerProfilePage> {
+  final AuthService _auth = AuthService();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -17,6 +24,16 @@ class customerProfilePage extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0.0,
             actions: <Widget>[
+              // FutureBuilder(
+              //   future: Provider.of(context)._auth.getCurrentUser(),
+              //   builder: (context, snapshot){
+              //     if (snapshot.connectionState == ConnectionState.done){
+              //       return Text("${snapshot.data}");
+              //     }else{
+              //       return CircularProgressIndicator();
+              //     }
+              //   },
+              // ),
               IconButton(
                   padding: EdgeInsets.fromLTRB(0, 30, 240, 0),
                   icon: Icon(
@@ -35,7 +52,7 @@ class customerProfilePage extends StatelessWidget {
                   child: Text("Log Out",
                       style: TextStyle(color: Colors.green, fontSize: 20.0)),
                   onPressed: () async {
-                    await _authService.signOut();
+                    await _auth.signOut();
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => LoginPage()));
                   }),

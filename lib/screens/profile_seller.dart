@@ -4,7 +4,7 @@ import 'package:hehe/screens/update_profile.dart';
 import 'package:hehe/screens/home_seller.dart';
 import 'package:hehe/services/auth.dart';
 
-class SellerProfilePage extends StatelessWidget {
+class sellerProfilePage extends StatelessWidget {
   final AuthService _authService = AuthService();
   @override
   Widget build(BuildContext context) {

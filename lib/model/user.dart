@@ -1,43 +1,16 @@
 class UserModel {
-  String _uid;
+  String uid;
 
-  UserModel(this._uid);
-
-  String get uid => _uid;
-
-  set uid(String value) {
-    _uid = value;
-  }
-
+  UserModel(this.uid);
 }
 
 class CustomerModel {
-  String _uid;
-  String _name;
-  String _password;
-  String _phoneNumber;
-
-  CustomerModel(this._uid, this._name, this._password, this._phoneNumber);
-
-  String get uid => _uid;
-  set uid(String value) {
-    _uid = value;
-  }
-
-  String get name => _name;
-  set name(String value) {
-    _name = value;
-  }
-
-  String get password => _password;
-  set password(String value) {
-    _password = value;
-  }
-
-  String get phoneNumber => _phoneNumber;
-  set phoneNumber(String value) {
-    _phoneNumber = value;
-  }
+  String uid;
+  String name;
+  String password;
+  String phoneNumber;
+  int tipeUser;
+  CustomerModel(this.uid, this.name, this.password, this.phoneNumber, this.tipeUser);
 
   Map<String, dynamic> toJson () => {
     'uid': uid,
@@ -48,42 +21,22 @@ class CustomerModel {
 }
 
 class SellerModel {
-  String _uid;
-  String _name;
-  String _password;
-  String _phoneNumber;
-  String _tipePenjual;
+  String uid;
+  String name;
+  String password;
+  String phoneNumber;
+  int tipeUser;
+  int tipePenjual;
 
-  SellerModel(this._uid, this._name, this._password, this._phoneNumber,
-      this._tipePenjual);
+  SellerModel(this.uid, this.name, this.password, this.phoneNumber,
+      this.tipeUser, this.tipePenjual);
 
-  String get uid => _uid;
+  Map<String, dynamic> toJson () => {
+    'uid': uid,
+    'nama': name,
+    'password': password,
+    'phoneNumber': phoneNumber,
+    'tipePenjual' :tipePenjual
+  };
 
-  set uid(String value) {
-    _uid = value;
-  }
-
-  String get name => _name;
-
-  set name(String value) {
-    _name = value;
-  }
-
-  String get password => _password;
-
-  set password(String value) {
-    _password = value;
-  }
-
-  String get phoneNumber => _phoneNumber;
-
-  set phoneNumber(String value) {
-    _phoneNumber = value;
-  }
-
-  String get tipePenjual => _tipePenjual;
-
-  set tipePenjual(String value) {
-    _tipePenjual = value;
-  }
 }

@@ -68,7 +68,7 @@ class SellerHomePage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => SellerProfilePage()));
+                            builder: (context) => sellerProfilePage()));
                   }),
             ],
           ),

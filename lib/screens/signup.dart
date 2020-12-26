@@ -15,8 +15,8 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final AuthService _authService = AuthService();
   UserModel user = UserModel("");
-  CustomerModel customerModel = CustomerModel("", "", "", "");
-  SellerModel sellerModel = SellerModel("", "", "", "", "");
+  CustomerModel customerModel = CustomerModel("", "", "", "", 0);
+  SellerModel sellerModel = SellerModel("", "", "", "", 0, 0);
 
   var _formKeyCustomer = GlobalKey<FormState>();
   var _formKeySeller = GlobalKey<FormState>();
@@ -106,12 +106,11 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               body: TabBarView(
                 children: [
-                  SingleChildScrollView(
-                    child: Form(
+                    Form(
                       key: _formKeyCustomer,
                       child: Container(
                         margin: EdgeInsets.fromLTRB(20, 10, 20, 0),
-                        child: Column(
+                        child: ListView(
                           children: <Widget>[
                             Container(
                               padding: EdgeInsets.all(8),
@@ -192,7 +191,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       new BorderRadius.circular(30.0)),
                               onPressed: () async {
                                 var result = await _authService
-                                    .createUserWithPhone(_phoneNumber, context);
+                                    .verificationUserWithPhone(_phoneNumber, context);
                                 if (validateCust()) {
                                   if (_phoneNumber == "" || result == 'error') {
                                     return null;
@@ -217,10 +216,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    child: Form(
+                      ),
+                  Form(
                       key: _formKeySeller,
                       child: Container(
                         margin: EdgeInsets.fromLTRB(20, 10, 20, 0),
@@ -338,7 +335,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       new BorderRadius.circular(30.0)),
                               onPressed: () async {
                                 var result = await _authService
-                                    .createUserWithPhone(_phoneNumber, context);
+                                    .verificationUserWithPhone(_phoneNumber, context);
                                 if (validateSeller() || tipePenjual == 0) {
                                   if (_phoneNumber == "" || result == 'error') {
                                     return null;
@@ -369,7 +366,6 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                     ),
-                  )
                 ],
               ),
             ),

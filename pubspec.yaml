@@ -33,6 +33,8 @@ dependencies:
   cloud_firestore: ^0.13.0+1
   provider: ^4.3.2+3
   international_phone_input: ^1.0.4
+  dio: ^3.0.10
+  auto_size_text: ^2.1.0
 
 dev_dependencies:
   flutter_test:
