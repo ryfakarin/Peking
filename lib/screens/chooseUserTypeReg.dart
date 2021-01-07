@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:hehe/screens/chooseSellerTypeReg.dart';
-import 'package:hehe/screens/inputUserNameReg.dart';
-import 'package:hehe/widgets/customs.dart';
+import 'package:hehe/screens/regSeller.dart';
+import 'regCustomer.dart';
 
 class chooseUserTypePage extends StatefulWidget {
   @override
@@ -18,7 +17,7 @@ class _chooseUserTypePageState extends State<chooseUserTypePage> {
         body: Container(
       width: _width,
       height: _height,
-      color: Colors.lightGreen[800],
+      color: Colors.orange[100],
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -29,7 +28,7 @@ class _chooseUserTypePageState extends State<chooseUserTypePage> {
                 "Daftar sebagai",
                 maxLines: 1,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, color: Colors.white),
+                style: TextStyle(fontSize: 28, color: Colors.green[900]),
               ),
               SizedBox(height: _height * 0.05),
               RaisedButton(
@@ -39,13 +38,13 @@ class _chooseUserTypePageState extends State<chooseUserTypePage> {
                     borderRadius: BorderRadius.circular(20.0)),
                 child: Text(
                   "Pembeli",
-                  style: TextStyle(fontSize: 20, color: Colors.deepOrange[900]),
+                  style: TextStyle(fontSize: 20, color: Colors.green[900]),
                 ),
                 onPressed: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => inputNamePage(0)));
+                          builder: (context) => regCustomerPage(0)));
                 },
               ),
               SizedBox(height: _height * 0.025),
@@ -56,13 +55,13 @@ class _chooseUserTypePageState extends State<chooseUserTypePage> {
                     borderRadius: BorderRadius.circular(20.0)),
                 child: Text(
                   "Penjual",
-                  style: TextStyle(fontSize: 20, color: Colors.deepOrange[900]),
+                  style: TextStyle(fontSize: 20, color: Colors.green[900]),
                 ),
                 onPressed: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => chooseSellerTypePage()));
+                          builder: (context) => regSellerPage()));
                 },
               ),
             ],

@@ -8,46 +8,39 @@ import 'package:hehe/screens/home_customer.dart';
 class AuthService {
   FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // create user obj based on FirebaseUser
-  UserModel _userFromFirebaseUser(FirebaseUser user) {
-    return user != null ? UserModel(user.uid) : null;
-  }
+  // void _userFirebase (FirebaseUser user) async {
+  //   final FirebaseUser user = await _auth.currentUser();
+  //   final uid = user.uid;
+  // }
 
-  // auth change user stream
-  Stream<UserModel> get user {
-    return _auth.onAuthStateChanged.map(_userFromFirebaseUser);
-  }
-  // Stream<String> get onAuthStateChanged => _auth.onAuthStateChanged.map(
-  //     (FirebaseUser user) => user?.uid,
-  // );
+  Stream<String> get onAuthStateChanged => _auth.onAuthStateChanged.map((FirebaseUser user) => user?.uid);
+  // // auth change user stream
+  // Stream<UserModel> get user {
+  //   return _auth.onAuthStateChanged.map((_userFirebase));
+  //     //(FirebaseUser user) => _userFirebase(user));
+  // }
 
   // sign in without account
   Future signInAnon() async {
     try {
-      AuthResult authResult = await _auth.signInAnonymously();
-      FirebaseUser authUser = authResult.user;
-      return _userFromFirebaseUser(authUser);
+      return await _auth.signInAnonymously();
+      // FirebaseUser user = result.user;
+      // return await _userFirebase(user);
     } catch (e) {
       print(e.toString());
       return null;
     }
   }
 
-  // sign in with phone number
-
-  // register with phone number
+  // register and sign in with phone number
   Future verificationUserWithPhone(String phone, BuildContext context) {
     _auth.verifyPhoneNumber(
         phoneNumber: phone,
         timeout: Duration(seconds: 0),
         verificationCompleted: (AuthCredential authCredential) {
-          _auth
-              .signInWithCredential(authCredential)
-              .then((AuthResult result) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => CustomerHomePage()));
+          _auth.signInWithCredential(authCredential).then((AuthResult result) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CustomerHomePage()));
           }).catchError((e) {
             print("error");
           });
@@ -98,7 +91,7 @@ class AuthService {
                     ],
                   ));
         },
-        codeAutoRetrievalTimeout: (String verificationId){
+        codeAutoRetrievalTimeout: (String verificationId) {
           verificationId = verificationId;
           print(verificationId);
           print("Timeout");

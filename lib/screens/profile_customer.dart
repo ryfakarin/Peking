@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/login.dart';
 import 'package:hehe/services/auth.dart';
-import 'package:provider/provider.dart';
 import 'home_customer.dart';
 import 'package:hehe/screens/update_profile.dart';
 

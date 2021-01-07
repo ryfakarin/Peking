@@ -1,10 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hehe/screens/chooseUserTypeReg.dart';
 import 'package:hehe/services/auth.dart';
 import 'package:hehe/widgets/customs.dart';
 import 'package:international_phone_input/international_phone_input.dart';
-import 'signup.dart';
 import 'home_customer.dart';
 
 class LoginPage extends StatefulWidget {
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage>
                       ),
                       Container(
                         padding: EdgeInsets.fromLTRB(0, 20, 0, 10),
-                        child: Text('Peking',
+                        child: AutoSizeText('Peking',
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 36,
@@ -90,7 +90,7 @@ class _LoginPageState extends State<LoginPage>
                     ],
                   ),
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 20),
                 RaisedButton(
                   textColor: Colors.white,
                   padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
@@ -116,17 +116,33 @@ class _LoginPageState extends State<LoginPage>
                     }
                   },
                   child: Container(
-                    child: Text('Log In',
+                    child: AutoSizeText('Log In',
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold)),
                   ),
                 ),
+                SizedBox(height: 10),
                 Container(
-                  padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                  child: Center(
-                    child: Text('Belum memiliki akun?',
+                  child: TextButton(
+                    onPressed: () {
+                      _authService.signInAnon();
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CustomerHomePage()));
+                    },
+                    child: AutoSizeText('Masuk sebagai tamu',
                         style: TextStyle(
-                            color: Colors.lightGreen[800],
+                            color: Colors.lightGreen[700],
+                            fontSize: 15)),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Container(
+                  child: Center(
+                    child: AutoSizeText('Belum memiliki akun?',
+                        style: TextStyle(
+                            color: Colors.grey[600],
                             fontSize: 16,
                             fontWeight: FontWeight.bold)),
                   ),
@@ -139,9 +155,9 @@ class _LoginPageState extends State<LoginPage>
                           MaterialPageRoute(
                               builder: (context) => chooseUserTypePage()));
                     },
-                    child: Text('Buat akun baru',
+                    child: AutoSizeText('Buat akun baru',
                         style: TextStyle(
-                            color: Colors.grey[500],
+                            color: Colors.lightGreen[700],
                             fontSize: 15,
                             decoration: TextDecoration.underline)),
                   ),
