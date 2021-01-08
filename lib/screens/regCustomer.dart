@@ -4,16 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/services/auth.dart';
 import 'package:international_phone_input/international_phone_input.dart';
-import 'package:provider/provider.dart';
+import 'package:hehe/widgets/provider.dart';
 
-class regCustomerPage extends StatelessWidget {
-  final AuthService _authService = AuthService();
-  final db = Firestore.instance;
+class regCustomerPage extends StatefulWidget {
 
   int flag;
-  String phoneNumberCust;
 
   regCustomerPage(this.flag);
+
+  @override
+  _regCustomerPageState createState() => _regCustomerPageState();
+}
+
+class _regCustomerPageState extends State<regCustomerPage> {
+  String phoneNumberCust;
 
   TextEditingController namaController = TextEditingController();
 
@@ -27,8 +31,11 @@ class regCustomerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final db = Firestore.instance;
+
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
+
     return Scaffold(
         body: Container(
       width: _width,
@@ -66,7 +73,6 @@ class regCustomerPage extends StatelessWidget {
                 child: TextField(
                   controller: namaController,
                   decoration: InputDecoration.collapsed(hintText: 'Nama anda'),
-                  onChanged: (val) {},
                 ),
               ),
               SizedBox(height: _height * 0.05),
@@ -104,23 +110,30 @@ class regCustomerPage extends StatelessWidget {
                 padding: EdgeInsets.all(5.0),
                 shape: CircleBorder(),
                 onPressed: () async {
-                  if (namaController.text != "" && phoneNumberCust != "") {
-                    userModel.uid = await _authService.getCurrentUID();
-                    userModel.name = namaController.text;
-                    userModel.phoneNumber = phoneNumberCust;
-                    userModel.tipeUser = 0;
-                    // final uid = await Provider.of(context).auth.getCurrentUID();
-                    // UserModel(uid, namaController.text, phoneNumberCust, 0);
-                    //await db.collection("userData").document(uid).collection("user").add(data)
-                    print(userModel.uid);
-                    print(userModel.name);
-                    print(userModel.phoneNumber);
-                    print(userModel.tipeUser);
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) =>
-                    //             inputPhonePage(flag, namaController.text)));
+                  try {
+                    if (namaController.text != "" && phoneNumberCust != "") {
+                      final auth = Provider.of(context).auth;
+                      //String uid = await auth.verificationUserWithPhone(phoneNumberCust, context);
+                      //print("Signed In with ID $uid");
+                      // userModel.uid = await _authService.getCurrentUID();
+                      // userModel.name = namaController.text;
+                      // userModel.phoneNumber = phoneNumberCust;
+                      // userModel.tipeUser = 0;
+                      // // final uid = await Provider.of(context).auth.getCurrentUID();
+                      // userModel.map(())(null, namaController.text, phoneNumberCust, 0);
+                      // //await db.collection("userData").document(uid).collection("user").add(data)
+                      // print(userModel.uid);
+                      print(userModel.name);
+                      print(userModel.phoneNumber);
+                      print(userModel.tipeUser);
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) =>
+                      //             inputPhonePage(flag, namaController.text)));
+                    }
+                  } on Exception catch (e) {
+                    print(e);
                   }
                 },
               ),

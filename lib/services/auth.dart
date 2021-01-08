@@ -6,19 +6,23 @@ import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_customer.dart';
 
 class AuthService {
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // void _userFirebase (FirebaseUser user) async {
-  //   final FirebaseUser user = await _auth.currentUser();
-  //   final uid = user.uid;
-  // }
+  Stream<String> get onAuthStateChanged =>
+      _auth.onAuthStateChanged.map((FirebaseUser user) => user?.uid);
 
-  Stream<String> get onAuthStateChanged => _auth.onAuthStateChanged.map((FirebaseUser user) => user?.uid);
-  // // auth change user stream
-  // Stream<UserModel> get user {
-  //   return _auth.onAuthStateChanged.map((_userFirebase));
-  //     //(FirebaseUser user) => _userFirebase(user));
-  // }
+  // GET UID
+  Future<String> getCurrentUID() async {
+    FirebaseUser user = await _auth.currentUser();
+    String userid = user.uid;
+    print(userid);
+    return userid;
+  }
+
+  // GET CURRENT USER
+  Future getCurrentUser() async {
+    return await _auth.currentUser();
+  }
 
   // sign in without account
   Future signInAnon() async {
@@ -33,7 +37,7 @@ class AuthService {
   }
 
   // register and sign in with phone number
-  Future verificationUserWithPhone(String phone, BuildContext context) {
+  Future <String> verificationUserWithPhone(String phone, BuildContext context) {
     _auth.verifyPhoneNumber(
         phoneNumber: phone,
         timeout: Duration(seconds: 0),
@@ -42,7 +46,7 @@ class AuthService {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => CustomerHomePage()));
           }).catchError((e) {
-            print("error");
+            return "error";
           });
         },
         verificationFailed: (AuthException exception) {
@@ -78,13 +82,13 @@ class AuthService {
                               smsCode: _codeController.text.trim());
                           _auth
                               .signInWithCredential(_credential)
-                              .then((AuthResult result) {
+                              .then((AuthResult result) async {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => CustomerHomePage()));
-                          }).catchError((e) {
-                            print("error");
+                              }).catchError((e) {
+                            return "error";
                           });
                         },
                       )
@@ -98,15 +102,6 @@ class AuthService {
         });
   }
 
-  // get UID
-  Future<String> getCurrentUID() async {
-    return (await _auth.currentUser()).uid;
-  }
-
-  // get current user
-  Future getCurrentUser() async {
-    return await _auth.currentUser();
-  }
 
   // sign out
   Future signOut() async {

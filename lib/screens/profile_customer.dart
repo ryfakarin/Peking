@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/login.dart';
 import 'package:hehe/services/auth.dart';
+import 'package:hehe/widgets/provider.dart';
 import 'home_customer.dart';
 import 'package:hehe/screens/update_profile.dart';
 
@@ -14,56 +15,62 @@ class _customerProfilePageState extends State<customerProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
     return Scaffold(
         backgroundColor: Colors.lime[50],
         appBar: new AppBar(
             leading: null,
-            toolbarHeight: 70,
+            toolbarHeight: _height*0.07,
             backgroundColor: Colors.transparent,
             elevation: 0.0,
             actions: <Widget>[
-              // FutureBuilder(
-              //   future: Provider.of(context)._auth.getCurrentUser(),
-              //   builder: (context, snapshot){
-              //     if (snapshot.connectionState == ConnectionState.done){
-              //       return Text("${snapshot.data}");
-              //     }else{
-              //       return CircularProgressIndicator();
-              //     }
-              //   },
-              // ),
-              IconButton(
-                  padding: EdgeInsets.fromLTRB(0, 30, 240, 0),
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 28.0,
-                    color: Colors.green,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CustomerHomePage()));
-                  }),
-              FlatButton(
-                  padding: EdgeInsets.fromLTRB(0, 30, 20, 0),
-                  child: Text("Log Out",
-                      style: TextStyle(color: Colors.green, fontSize: 20.0)),
-                  onPressed: () async {
-                    await _auth.signOut();
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginPage()));
-                  }),
-            ]),
+              Row(
+                children: [
+                  IconButton(
+                      padding: EdgeInsets.only(right: _width*0.65),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        size: 28.0,
+                        color: Colors.green,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CustomerHomePage()));
+                      }),
+                  FlatButton(
+                      padding: EdgeInsets.only(right: _width*0.05),
+                      child: Text("Log Out",
+                          style: TextStyle(color: Colors.green, fontSize: 20.0)),
+                      onPressed: () async {
+                        await _auth.signOut();
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => LoginPage()));
+                      }),
+                ]),
+                ],
+              ),
         body: SingleChildScrollView(
           child: Container(
-            height: 1000,
-            // color: Colors.pink[50],
+            height: _height*0.8,
+            color: Colors.pink[50],
             child: Padding(
               padding: EdgeInsets.all(0),
               child: Column(
                 children: <Widget>[
+                  FutureBuilder(
+                    future: Provider.of(context).auth.getCurrentUID(),
+                    builder: (context, snapshot){
+                      if (snapshot.connectionState == ConnectionState.done){
+                        return Text("${snapshot.data}");
+                        // return Text("done");
+                      }else{
+                        return CircularProgressIndicator();
+                      }
+                    },
+                  ),
                   Container(
                     height: 220,
                     width: 220,
@@ -108,10 +115,11 @@ class _customerProfilePageState extends State<customerProfilePage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(30.0)),
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => UpdateProfile()));
+                      print(_auth.getCurrentUID());
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => UpdateProfile()));
                     },
                     child: Container(
                       child: Text('Ubah Profil',

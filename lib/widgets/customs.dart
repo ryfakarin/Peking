@@ -117,3 +117,22 @@ class CustomDialog extends StatelessWidget {
     }
   }
 }
+
+Widget showAlert(String errorMessage) {
+
+  return Container(
+    color: Colors.redAccent[800],
+    width: double.infinity,
+    padding: EdgeInsets.all(8.0),
+    child: Row(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: Icon(Icons.error_outline),
+        ),
+        Expanded(child: AutoSizeText(errorMessage, maxLines: 2, style: TextStyle(color: Colors.black),)),
+      ],
+    ),
+  );
+
+}
