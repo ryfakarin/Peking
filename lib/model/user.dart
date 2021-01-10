@@ -4,7 +4,7 @@ class UserModel {
   String phoneNumber;
   int tipeUser;
 
-  UserModel({this.uid, this.name, this.phoneNumber, this.tipeUser});
+  UserModel(this.uid, this.name, this.phoneNumber, this.tipeUser);
 
   Map<String, dynamic> toJson() => {
         'uid': uid,

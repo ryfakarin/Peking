@@ -86,23 +86,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     return Scaffold(
         appBar: new AppBar(
           leading: null,
-          toolbarHeight: _height * 0.12,
+          toolbarHeight: _height * 0.1,
           backgroundColor: Colors.transparent,
           elevation: 0.0,
           actions: <Widget>[
-            IconButton(
-                padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                icon: Icon(
-                  Icons.arrow_back,
-                  size: 28.0,
-                  color: Colors.green,
-                ),
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
-                }),
             Container(
-              margin: EdgeInsets.fromLTRB(0, 25, 10, 0),
+              margin: EdgeInsets.fromLTRB(0, 0, _width*0.03, 0),
               height: 45,
               width: 45,
               decoration: BoxDecoration(
@@ -110,7 +99,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                       image: AssetImage('assets/images/logo.PNG'))),
             ),
             Container(
-                padding: EdgeInsets.fromLTRB(0, 52, 80, 20),
+                padding: EdgeInsets.fromLTRB(0, _height*0.04, _width*0.25, 0),
                 child: Text('Peking',
                     style: TextStyle(
                         color: Colors.green,
@@ -118,7 +107,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                         // fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold))),
             IconButton(
-                padding: EdgeInsets.fromLTRB(0, 50, 0, 20),
                 icon: Icon(
                   Icons.history,
                   size: 28.0,
@@ -131,7 +119,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                           builder: (context) => StatusAndHistory()));
                 }),
             IconButton(
-                padding: EdgeInsets.fromLTRB(0, 50, 50, 20),
+                padding: EdgeInsets.fromLTRB(0, 0, _width*0.15, 0),
                 icon: Icon(
                   Icons.account_circle,
                   size: 30.0,

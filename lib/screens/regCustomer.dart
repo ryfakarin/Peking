@@ -7,16 +7,14 @@ import 'package:international_phone_input/international_phone_input.dart';
 import 'package:hehe/widgets/provider.dart';
 
 class regCustomerPage extends StatefulWidget {
-
-  int flag;
-
-  regCustomerPage(this.flag);
+  regCustomerPage(flag);
 
   @override
   _regCustomerPageState createState() => _regCustomerPageState();
 }
 
 class _regCustomerPageState extends State<regCustomerPage> {
+  int tipeUser;
   String phoneNumberCust;
 
   TextEditingController namaController = TextEditingController();
@@ -70,7 +68,7 @@ class _regCustomerPageState extends State<regCustomerPage> {
                     border: Border(
                   bottom: BorderSide(color: Colors.teal[900]),
                 )),
-                child: TextField(
+                child: TextFormField(
                   controller: namaController,
                   decoration: InputDecoration.collapsed(hintText: 'Nama anda'),
                 ),
@@ -113,24 +111,12 @@ class _regCustomerPageState extends State<regCustomerPage> {
                   try {
                     if (namaController.text != "" && phoneNumberCust != "") {
                       final auth = Provider.of(context).auth;
-                      //String uid = await auth.verificationUserWithPhone(phoneNumberCust, context);
-                      //print("Signed In with ID $uid");
-                      // userModel.uid = await _authService.getCurrentUID();
-                      // userModel.name = namaController.text;
-                      // userModel.phoneNumber = phoneNumberCust;
-                      // userModel.tipeUser = 0;
-                      // // final uid = await Provider.of(context).auth.getCurrentUID();
-                      // userModel.map(())(null, namaController.text, phoneNumberCust, 0);
-                      // //await db.collection("userData").document(uid).collection("user").add(data)
-                      // print(userModel.uid);
-                      print(userModel.name);
-                      print(userModel.phoneNumber);
-                      print(userModel.tipeUser);
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) =>
-                      //             inputPhonePage(flag, namaController.text)));
+                      String userName = namaController.text;
+                      tipeUser = 0;
+                      String uid = await auth.signUpUserWithPhone(
+                          phoneNumberCust, context, userName, tipeUser);
+                      print(userName);
+                      print(phoneNumberCust);
                     }
                   } on Exception catch (e) {
                     print(e);

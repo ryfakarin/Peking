@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 class Provider extends InheritedWidget {
   final AuthService auth;
   final db;
-  final colors;
 
-  Provider({Key key, Widget child, this.auth, this.db, this.colors})
+  Provider({Key key, Widget child, this.auth, this.db})
       : super(key: key, child: child);
 
   @override

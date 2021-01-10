@@ -18,8 +18,6 @@ class _LoginPageState extends State<LoginPage>
   var _formKey = GlobalKey<FormState>();
 
   String phoneNumber = '';
-  String password = '';
-  bool showBox = false;
 
   bool validate() {
     final form = _formKey.currentState;
@@ -51,7 +49,7 @@ class _LoginPageState extends State<LoginPage>
         child: SafeArea(
           child: Column(
             children: <Widget>[
-              SizedBox(height: _height*0.12),
+              SizedBox(height: _height * 0.12),
               Container(
                 padding: EdgeInsets.only(right: 50, left: 50),
                 decoration: BoxDecoration(
@@ -60,8 +58,8 @@ class _LoginPageState extends State<LoginPage>
                 child: Column(
                   children: <Widget>[
                     Container(
-                      height: _height*0.2,
-                      width: _width*0.4,
+                      height: _height * 0.2,
+                      width: _width * 0.4,
                       decoration: BoxDecoration(
                           image: DecorationImage(
                               image: AssetImage('assets/images/logo.PNG'))),
@@ -92,7 +90,7 @@ class _LoginPageState extends State<LoginPage>
                   ],
                 ),
               ),
-              SizedBox(height: _height*0.03),
+              SizedBox(height: _height * 0.03),
               RaisedButton(
                 textColor: Colors.white,
                 padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
@@ -100,15 +98,17 @@ class _LoginPageState extends State<LoginPage>
                 shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
                 onPressed: () async {
-                  var result = await _authService.verificationUserWithPhone(
+                  var result = await _authService.signInUserWithPhone(
                       phoneNumber, context);
                   if (phoneNumber == "" || result == 'error') {
-                    showDialog(context: context, builder: (BuildContext context) => CustomDialog(
-                      title: "Masukkan nomor anda",
-                      description: " ",
-                      primaryButtonText: "OK",
-                      primaryButtonRoute: "/loginPage"
-                    ),);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => CustomDialog(
+                          title: "Masukkan nomor anda",
+                          description: " ",
+                          primaryButtonText: "OK",
+                          primaryButtonRoute: "/loginPage"),
+                    );
                   }
                 },
                 child: Container(
@@ -117,7 +117,7 @@ class _LoginPageState extends State<LoginPage>
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 ),
               ),
-              SizedBox(height: _height*0.01),
+              SizedBox(height: _height * 0.01),
               Container(
                 child: TextButton(
                   onPressed: () {
@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage>
                           color: Colors.lightGreen[700], fontSize: 15)),
                 ),
               ),
-              SizedBox(height: _height*0.03),
+              SizedBox(height: _height * 0.03),
               Container(
                 child: Center(
                   child: AutoSizeText('Belum memiliki akun?',

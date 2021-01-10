@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/login.dart';
@@ -16,6 +17,7 @@ class App extends StatelessWidget {
     // return login page
     return Provider(
       auth: AuthService(),
+        db: Firestore.instance,
         child: MaterialApp(
               home: Wrapper(),
               routes: <String, WidgetBuilder>{

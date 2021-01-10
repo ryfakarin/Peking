@@ -11,6 +11,7 @@ class regSellerPage extends StatefulWidget {
 class _regSellerPageState extends State<regSellerPage> {
   int radioValue = 0;
   String phoneNumberSeller = '';
+  String userName;
 
   final AuthService _authService = AuthService();
   TextEditingController namaController = TextEditingController();
@@ -136,7 +137,7 @@ class _regSellerPageState extends State<regSellerPage> {
                 shape: CircleBorder(),
                 onPressed: () async {
                   var result = await _authService
-                      .verificationUserWithPhone(phoneNumberSeller, context);
+                      .signUpUserWithPhone(phoneNumberSeller, context, userName, radioValue);
                   if (radioValue == 0 && namaController.text != "" && phoneNumberSeller != "") {
                     print(radioValue);
                     print(namaController.text);
