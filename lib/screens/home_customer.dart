@@ -1,10 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/places.dart';
+import 'package:hehe/screens/profile_customer.dart';
 import 'package:hehe/screens/status_history.dart';
 import 'package:hehe/services/auth.dart';
 import 'package:hehe/services/credentials.dart';
-import 'profile_customer.dart';
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoder/geocoder.dart';

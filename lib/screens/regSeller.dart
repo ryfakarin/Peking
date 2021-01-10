@@ -1,6 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/services/auth.dart';
+import 'package:hehe/widgets/provider.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 
 class regSellerPage extends StatefulWidget {
@@ -10,24 +12,24 @@ class regSellerPage extends StatefulWidget {
 
 class _regSellerPageState extends State<regSellerPage> {
   int radioValue = 0;
-  String phoneNumberSeller = '';
-  String userName;
+  String phoneNumberCust;
 
   final AuthService _authService = AuthService();
   TextEditingController namaController = TextEditingController();
 
-  void PhoneNumberChangeSeller(
+  void PhoneNumberChangeCust(
       String number, String internationalizedPhoneNumber, String isCode) {
-    setState(() {
-      phoneNumberSeller = internationalizedPhoneNumber;
-      print(phoneNumberSeller);
-    });
+    phoneNumberCust = internationalizedPhoneNumber;
+    print(phoneNumberCust);
   }
 
   @override
   Widget build(BuildContext context) {
+    final db = Firestore.instance;
+
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
+
     return Scaffold(
         body: Container(
       width: _width,
@@ -98,7 +100,6 @@ class _regSellerPageState extends State<regSellerPage> {
                 child: TextField(
                   controller: namaController,
                   decoration: InputDecoration.collapsed(hintText: 'Nama anda'),
-                  onChanged: (val) {},
                 ),
               ),
               SizedBox(height: _height * 0.04),
@@ -118,8 +119,8 @@ class _regSellerPageState extends State<regSellerPage> {
                 child: InternationalPhoneInput(
                     decoration: InputDecoration.collapsed(
                         hintText: '(813) 111-6167'),
-                    onPhoneNumberChange: PhoneNumberChangeSeller,
-                    initialPhoneNumber: phoneNumberSeller,
+                    onPhoneNumberChange: PhoneNumberChangeCust,
+                    initialPhoneNumber: phoneNumberCust,
                     initialSelection: 'ID',
                     enabledCountries: ['+62'],
                     showCountryFlags: false),
@@ -136,17 +137,19 @@ class _regSellerPageState extends State<regSellerPage> {
                 padding: EdgeInsets.all(5.0),
                 shape: CircleBorder(),
                 onPressed: () async {
-                  var result = await _authService
-                      .signUpUserWithPhone(phoneNumberSeller, context, userName, radioValue);
-                  if (radioValue == 0 && namaController.text != "" && phoneNumberSeller != "") {
-                    print(radioValue);
-                    print(namaController.text);
-                    print(phoneNumberSeller);
-                    // await Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) =>
-                    //             inputPhonePage(flag, namaController.text)));
+                  try {
+                    if (radioValue != 0 && namaController.text != "" && phoneNumberCust != "") {
+                      print(radioValue);
+                      print(namaController.text);
+                      print(phoneNumberCust);
+
+                      final auth = Provider.of(context).auth;
+                      String userName = namaController.text;
+                      String uid = await auth.signUpUserWithPhone(
+                          phoneNumberCust, context, userName, radioValue);
+                    }
+                  } on Exception catch (e) {
+                    print(e);
                   }
                 },
               ),

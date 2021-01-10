@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_customer.dart';
+import 'package:hehe/screens/home_seller.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -42,8 +43,17 @@ class AuthService {
         timeout: Duration(seconds: 0),
         verificationCompleted: (AuthCredential authCredential) {
           _auth.signInWithCredential(authCredential).then((AuthResult result) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CustomerHomePage()));
+            if(tipeUser == 0){
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CustomerHomePage()));
+            } else if(tipeUser != 0){
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SellerHomePage()));
+            }
           }).catchError((e) {
             return "error";
           });
@@ -84,10 +94,17 @@ class AuthService {
                           .then((AuthResult result) async {
                             String uid = await result.user.uid;
                             createUserToDatabase(uid, userName, phone, tipeUser);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CustomerHomePage()));
+                        if(tipeUser == 0){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CustomerHomePage()));
+                        } else if(tipeUser != 0){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SellerHomePage()));
+                        }
                       }).catchError((e) {
                         return "error";
                       });
