@@ -5,10 +5,9 @@ import 'package:hehe/screens/status_history.dart';
 import 'package:hehe/services/auth.dart';
 import 'package:hehe/services/credentials.dart';
 import 'profile_customer.dart';
-import 'login.dart';
 import 'package:dio/dio.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoder/geocoder.dart';
 
 class CustomerHomePage extends StatefulWidget {
   @override
@@ -18,20 +17,17 @@ class CustomerHomePage extends StatefulWidget {
 class _CustomerHomePageState extends State<CustomerHomePage> {
   final AuthService _authService = AuthService();
 
-  TextEditingController _searchController = new TextEditingController();
   GoogleMapController _mapController;
-
   String searchAddress;
-  String _heading;
-
-  List<Places> _placesList = [];
   final Set<Marker> _mapMarker = {};
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
+
+  TextEditingController _searchController = new TextEditingController();
+  List<Places> _placesList = [];
 
   @override
   void initState() {
     super.initState();
-    _heading = null;
     _mapMarker.add(Marker(
       markerId: MarkerId("-7.8032076, 110.3573354"),
       position: _currentPosition,
@@ -42,7 +38,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   void getLocationResults(String input) async {
     String baseUrl =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-    String type = '(address)';
+    String type = '(cities)';
 
     String req = '$baseUrl?input=$input&key=$PLACES_API_KEY&type=$type';
     Response response = await Dio().get(req);
@@ -68,11 +64,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   searchAndNavigate(String searchString) {
-    // Geolocator().placemarkFromAddress(searchAddress).then((result) {
-    //   _mapController.animateCamera(CameraUpdate.newCameraPosition(
-    //     target: LatLng(searchAddress.position.latitude, searchAddress.position.langitude, zoom: 10.0);
-    //   ))
-    // });
+
+    Geocoder.local.findAddressesFromQuery(searchString).then((result) {
+      _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(result.first.coordinates.latitude, result.first.coordinates.longitude), zoom: 14.0
+      )));
+    });
   }
 
   @override
@@ -81,7 +78,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     final _height = MediaQuery.of(context).size.height;
 
     final Set<Marker> _mapMarker = {};
-    // final LatLng _currentPosition = LatLng();
+    final LatLng _currentPosition = LatLng(6.2088, 106.8456);
 
     return Scaffold(
         appBar: new AppBar(
@@ -99,7 +96,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                       image: AssetImage('assets/images/logo.PNG'))),
             ),
             Container(
-                padding: EdgeInsets.fromLTRB(0, _height*0.04, _width*0.25, 0),
+                padding: EdgeInsets.fromLTRB(0, _height*0.04, _width*0.3, 0),
                 child: Text('Peking',
                     style: TextStyle(
                         color: Colors.green,
@@ -119,7 +116,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                           builder: (context) => StatusAndHistory()));
                 }),
             IconButton(
-                padding: EdgeInsets.fromLTRB(0, 0, _width*0.15, 0),
+                padding: EdgeInsets.fromLTRB(0, 0, _width*0.1, 0),
                 icon: Icon(
                   Icons.account_circle,
                   size: 30.0,
@@ -162,17 +159,18 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                       searchAndNavigate(searchAddress);
                     },
                   )),
-              SizedBox(height: _height * 0.01),
+              SizedBox(height: _height * 0.02),
               Stack(children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(left: 20, right: 20),
                   height: _height * 0.4,
                   color: Colors.lightGreen,
                   child: GoogleMap(
+                    initialCameraPosition:
+                    CameraPosition(target: _currentPosition, zoom: 14.0),
                     mapType: MapType.normal,
                     markers: _mapMarker,
-                    initialCameraPosition:
-                        CameraPosition(target: _currentPosition, zoom: 14.0),
+                    myLocationEnabled: true,
                     onMapCreated: mapCreated,
                   ),
                 ),
