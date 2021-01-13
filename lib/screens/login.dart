@@ -1,9 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hehe/screens/chooseUserTypeReg.dart';
 import 'package:hehe/services/auth.dart';
 import 'package:hehe/widgets/customs.dart';
+import 'package:hehe/widgets/provider.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 import 'home_customer.dart';
 
@@ -43,6 +43,7 @@ class _LoginPageState extends State<LoginPage>
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       backgroundColor: Colors.white,
       body: Form(
         key: _formKey,
@@ -98,7 +99,7 @@ class _LoginPageState extends State<LoginPage>
                 shape: RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)),
                 onPressed: () async {
-                  var result = await _authService.signInUserWithPhone(
+                  var result = await Provider.of(context).auth.signInUserWithPhone(
                       phoneNumber, context);
                   if (phoneNumber == "" || result == 'error') {
                     showDialog(
@@ -121,7 +122,7 @@ class _LoginPageState extends State<LoginPage>
               Container(
                 child: TextButton(
                   onPressed: () {
-                    _authService.signInAnon();
+                    Provider.of(context).auth.signInAnon();
                     Navigator.push(
                         context,
                         MaterialPageRoute(

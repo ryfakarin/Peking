@@ -1,9 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/login.dart';
-import 'package:hehe/services/auth.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'home_customer.dart';
 import 'package:hehe/screens/update_profile.dart';
@@ -14,7 +12,6 @@ class customerProfilePage extends StatefulWidget {
 }
 
 class _customerProfilePageState extends State<customerProfilePage> {
-  AuthService _auth = AuthService();
   UserModel user = UserModel("", "", "", null);
   String docId;
 
@@ -85,7 +82,7 @@ class _customerProfilePageState extends State<customerProfilePage> {
                   child: Text("Log Out",
                       style: TextStyle(color: Colors.green, fontSize: 20.0)),
                   onPressed: () async {
-                    await _auth.signOut();
+                    await Provider.of(context).auth.signOut();
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => LoginPage()));
                   }),

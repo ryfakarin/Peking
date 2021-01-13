@@ -1,13 +1,15 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/places.dart';
+import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/profile_customer.dart';
 import 'package:hehe/screens/status_history.dart';
-import 'package:hehe/services/auth.dart';
 import 'package:hehe/services/credentials.dart';
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoder/geocoder.dart';
+import 'package:hehe/widgets/provider.dart';
 
 class CustomerHomePage extends StatefulWidget {
   @override
@@ -15,7 +17,6 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
-  final AuthService _authService = AuthService();
 
   GoogleMapController _mapController;
   String searchAddress;
@@ -50,7 +51,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       String name = predictions[i]['description'];
       _displayedResults.add(Places(name));
     }
-    print(response);
 
     setState(() {
       _placesList = _displayedResults;
@@ -64,13 +64,40 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   searchAndNavigate(String searchString) {
-
     Geocoder.local.findAddressesFromQuery(searchString).then((result) {
-      _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(result.first.coordinates.latitude, result.first.coordinates.longitude), zoom: 14.0
-      )));
+      _mapController.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: LatLng(result.first.coordinates.latitude,
+                  result.first.coordinates.longitude),
+              zoom: 14.0)));
     });
   }
+
+  // getDocument() async {
+  //   final uid = await Provider.of(context).auth.getCurrentUID();
+  //   String docId;
+  //
+  //   var doc_ref = await Provider.of(context)
+  //       .db
+  //       .collection('userData')
+  //       .document(uid)
+  //       .collection('dataProfile')
+  //       .getDocuments();
+  //   doc_ref.documents.forEach((result) {
+  //     docId = result.documentID;
+  //   });
+  //
+  //   await Provider.of(context)
+  //       .db
+  //       .collection('userData')
+  //       .document(uid)
+  //       .collection('dataProfile')
+  //       .document(docId)
+  //       .where("tipeUser", "in", ["1", "2"])
+  //       .then((result) {
+  //     user.uid[] = result.data[uid];
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +108,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     final LatLng _currentPosition = LatLng(6.2088, 106.8456);
 
     return Scaffold(
+        resizeToAvoidBottomPadding: false,
         appBar: new AppBar(
           leading: null,
           toolbarHeight: _height * 0.1,
@@ -88,7 +116,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           elevation: 0.0,
           actions: <Widget>[
             Container(
-              margin: EdgeInsets.fromLTRB(0, 0, _width*0.03, 0),
+              margin: EdgeInsets.fromLTRB(0, 0, _width * 0.03, 0),
               height: 45,
               width: 45,
               decoration: BoxDecoration(
@@ -96,7 +124,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                       image: AssetImage('assets/images/logo.PNG'))),
             ),
             Container(
-                padding: EdgeInsets.fromLTRB(0, _height*0.04, _width*0.3, 0),
+                padding:
+                    EdgeInsets.fromLTRB(0, _height * 0.04, _width * 0.3, 0),
                 child: Text('Peking',
                     style: TextStyle(
                         color: Colors.green,
@@ -116,7 +145,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                           builder: (context) => StatusAndHistory()));
                 }),
             IconButton(
-                padding: EdgeInsets.fromLTRB(0, 0, _width*0.1, 0),
+                padding: EdgeInsets.fromLTRB(0, 0, _width * 0.1, 0),
                 icon: Icon(
                   Icons.account_circle,
                   size: 30.0,
@@ -163,11 +192,11 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               Stack(children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(left: 20, right: 20),
-                  height: _height * 0.4,
+                  height: _height * 0.35,
                   color: Colors.lightGreen,
                   child: GoogleMap(
                     initialCameraPosition:
-                    CameraPosition(target: _currentPosition, zoom: 14.0),
+                        CameraPosition(target: _currentPosition, zoom: 14.0),
                     mapType: MapType.normal,
                     markers: _mapMarker,
                     myLocationEnabled: true,
@@ -175,18 +204,61 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   ),
                 ),
                 Container(
-                  height: _height * 0.4,
+                  height: _height * 0.35,
                   margin: EdgeInsets.only(left: 20, right: 20),
-                  child: ListView.builder(
+                  child: new ListView.builder(
                     itemCount: _placesList.length,
                     itemBuilder: (BuildContext context, int index) =>
                         searchResultCard(context, index),
                   ),
                 ),
               ]),
+              SizedBox(height: _height * 0.03),
+              Container(
+                padding: EdgeInsets.only(right: 20, left: 20),
+                height: _height * 0.3,
+                width: _width,
+                child: StreamBuilder(
+                  stream: getMenuStreamSnapshots(context),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return CircularProgressIndicator();
+                    return ListView.builder(
+                        itemCount: snapshot.data.documents.length,
+                        itemBuilder: (BuildContext context, int index) =>
+                            buildMenuCard(context, snapshot.data.documents[index]));
+                  },
+                ),
+              )
             ],
           ),
         )));
+  }
+
+  Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+    yield* Firestore.instance.collection('dataJualan').snapshots();
+  }
+
+  Widget buildMenuCard(BuildContext context, DocumentSnapshot document) {
+    return new SingleChildScrollView(
+      child: Card(
+        color: Colors.grey[200],
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            children: <Widget>[
+              Row(
+                children: [
+                  AutoSizeText(document['nama'], maxLines: 1, style: TextStyle(fontSize: 14),),
+                  Spacer(),
+                  IconButton(icon: Icon(Icons.favorite), onPressed: () {}),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget searchResultCard(BuildContext context, int index) {
@@ -210,12 +282,11 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                               children: <Widget>[
                                 InkWell(
                                     child: AutoSizeText(_placesList[index].name,
-                                        maxLines: 1
-                                    ),
+                                        maxLines: 1),
                                     onTap: () {
-                                      var parts = _placesList[index].name.split(',');
+                                      var parts =
+                                          _placesList[index].name.split(',');
                                       searchAddress = parts[0].trim();
-                                      print(searchAddress);
                                       searchAndNavigate(searchAddress);
                                     }),
                               ],

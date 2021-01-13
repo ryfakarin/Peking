@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
-import 'package:hehe/services/auth.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:hehe/widgets/provider.dart';
 

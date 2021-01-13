@@ -10,6 +10,6 @@ class UserModel {
         'uid': uid,
         'nama': name,
         'phoneNumber': phoneNumber,
-        'tipeUser' : tipeUser
+        'tipeUser': tipeUser
       };
 }

@@ -37,22 +37,19 @@ class AuthService {
   }
 
   // sign up phone number
-  Future <String> signUpUserWithPhone(String phone, BuildContext context, String userName, int tipeUser) {
+  Future<String> signUpUserWithPhone(
+      String phone, BuildContext context, String userName, int tipeUser) {
     _auth.verifyPhoneNumber(
         phoneNumber: phone,
         timeout: Duration(seconds: 0),
         verificationCompleted: (AuthCredential authCredential) {
           _auth.signInWithCredential(authCredential).then((AuthResult result) {
-            if(tipeUser == 0){
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CustomerHomePage()));
-            } else if(tipeUser != 0){
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SellerHomePage()));
+            if (tipeUser == 0) {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => CustomerHomePage()));
+            } else if (tipeUser != 0) {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SellerHomePage()));
             }
           }).catchError((e) {
             return "error";
@@ -67,51 +64,53 @@ class AuthService {
               context: context,
               barrierDismissible: false,
               builder: (context) => AlertDialog(
-                title: Text("Kode Verifikasi Anda"),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    TextField(
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
+                    title: Text("Kode Verifikasi Anda"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextField(
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          controller: _codeController,
+                        )
                       ],
-                      controller: _codeController,
-                    )
-                  ],
-                ),
-                actions: <Widget>[
-                  FlatButton(
-                    color: Colors.lightGreen,
-                    child: Text("Submit"),
-                    textColor: Colors.white,
-                    onPressed: () {
-                      var _credential = PhoneAuthProvider.getCredential(
-                          verificationId: verificationId,
-                          smsCode: _codeController.text.trim());
-                      _auth
-                          .signInWithCredential(_credential)
-                          .then((AuthResult result) async {
+                    ),
+                    actions: <Widget>[
+                      FlatButton(
+                        color: Colors.lightGreen,
+                        child: Text("Submit"),
+                        textColor: Colors.white,
+                        onPressed: () {
+                          var _credential = PhoneAuthProvider.getCredential(
+                              verificationId: verificationId,
+                              smsCode: _codeController.text.trim());
+                          _auth
+                              .signInWithCredential(_credential)
+                              .then((AuthResult result) async {
                             String uid = await result.user.uid;
-                            createUserToDatabase(uid, userName, phone, tipeUser);
-                        if(tipeUser == 0){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => CustomerHomePage()));
-                        } else if(tipeUser != 0){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SellerHomePage()));
-                        }
-                      }).catchError((e) {
-                        return "error";
-                      });
-                    },
-                  )
-                ],
-              ));
+                            createUserToDatabase(
+                                uid, userName, phone, tipeUser);
+                            if (tipeUser == 0) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          CustomerHomePage()));
+                            } else if (tipeUser != 0) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SellerHomePage()));
+                            }
+                          }).catchError((e) {
+                            return "error";
+                          });
+                        },
+                      )
+                    ],
+                  ));
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           verificationId = verificationId;
@@ -121,7 +120,7 @@ class AuthService {
   }
 
   // register and sign in with phone number
-  Future <String> signInUserWithPhone(String phone, BuildContext context) {
+  Future signInUserWithPhone(String phone, BuildContext context) {
     _auth.verifyPhoneNumber(
         phoneNumber: phone,
         timeout: Duration(seconds: 0),
@@ -171,8 +170,20 @@ class AuthService {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => CustomerHomePage()));
-                              }).catchError((e) {
-                            return "error";
+                            // int tipeUser = getDocument();
+                            // if (getDocument == 0) {
+                            //   Navigator.push(
+                            //       context,
+                            //       MaterialPageRoute(
+                            //           builder: (context) => CustomerHomePage()));
+                            // } else if (getDocument == 1 || getDocument == 2){
+                            //   Navigator.push(
+                            //       context,
+                            //       MaterialPageRoute(
+                            //           builder: (context) => CustomerHomePage()));
+                            // }
+                          }).catchError((e) {
+                            print("error");
                           });
                         },
                       )
@@ -186,7 +197,6 @@ class AuthService {
         });
   }
 
-
   // sign out
   Future signOut() async {
     try {
@@ -196,15 +206,48 @@ class AuthService {
     }
   }
 
-  void createUserToDatabase(String uidUser, String namaUser, String phoneUser, int tipeUser) async {
-
+  void createUserToDatabase(
+      String uidUser, String namaUser, String phoneUser, int tipeUser) async {
     UserModel userModel = new UserModel(uidUser, namaUser, phoneUser, tipeUser);
 
     try {
-      await db.collection("userData").document(uidUser).collection("profileData").add(userModel.toJson());
+      await db
+          .collection("userData")
+          .document(uidUser)
+          .collection("profileData")
+          .add(userModel.toJson());
     } on Exception catch (e) {
       print(e);
     }
   }
 
+  // getDocument() async {
+  //   UserModel user = UserModel("", "", "", null);
+  //   final uid = await getCurrentUID();
+  //   String docId;
+  //
+  //   var doc_ref = await db
+  //       .collection('userData')
+  //       .document(uid)
+  //       .collection('profileData')
+  //       .getDocuments();
+  //   doc_ref.documents.forEach((result) {
+  //     docId = result.documentID;
+  //   });
+  //
+  //   await db
+  //       .collection('userData')
+  //       .document(uid)
+  //       .collection('profileData')
+  //       .document(docId)
+  //       .get()
+  //       .then((result) {
+  //     user.phoneNumber = result.data['phoneNumber'];
+  //     user.name = result.data['nama'];
+  //     user.tipeUser = result.data['tipeUser'];
+  //     user.uid = result.data['uid'];
+  //   });
+  //
+  //   return user.tipeUser;
+  // }
 }

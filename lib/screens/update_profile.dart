@@ -11,7 +11,6 @@ class UpdateProfile extends StatefulWidget {
 }
 
 class _UpdateProfileState extends State<UpdateProfile> {
-
   UserModel user = UserModel("", "", "", null);
 
   String docId;
@@ -21,11 +20,11 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   @override
   Widget build(BuildContext context) {
-
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       backgroundColor: Colors.amber[50],
       appBar: new AppBar(
           toolbarHeight: _height * 0.07,
@@ -40,12 +39,12 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   color: Colors.green,
                 ),
                 onPressed: () {
-                  if(user.tipeUser == 0){
+                  if (user.tipeUser == 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => customerProfilePage()));
-                  } else if(user.tipeUser != 0){
+                  } else if (user.tipeUser != 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -91,13 +90,16 @@ class _UpdateProfileState extends State<UpdateProfile> {
                         fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: _height * 0.01),
-              FutureBuilder(future: getDocument(), builder: (context, snapshot){
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return inputBox(namaController, user.name);
-                }else{
-                  return CircularProgressIndicator();
-                }
-              },),
+              FutureBuilder(
+                future: getDocument(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return inputBox(namaController, user.name);
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
               SizedBox(height: _height * 0.01),
               Container(
                 padding: EdgeInsets.only(right: _width * 0.5),
@@ -108,13 +110,16 @@ class _UpdateProfileState extends State<UpdateProfile> {
                         fontWeight: FontWeight.bold)),
               ),
               SizedBox(height: _height * 0.01),
-              FutureBuilder(future: getDocument(), builder: (context, snapshot){
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return inputBox(phoneController, user.phoneNumber);
-                }else{
-                  return CircularProgressIndicator();
-                }
-              },),
+              FutureBuilder(
+                future: getDocument(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return inputBox(phoneController, user.phoneNumber);
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
               SizedBox(height: 30),
               RaisedButton(
                 textColor: Colors.white,
@@ -124,30 +129,29 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     borderRadius: new BorderRadius.circular(30.0)),
                 // validasi untuk nanti ke seller atau customer
                 onPressed: () async {
-                  if(namaController.text != '' && phoneController.text != ""){
+                  if (namaController.text != '' && phoneController.text != "") {
                     user.name = namaController.text;
                     user.phoneNumber = phoneController.text;
                     setDocument();
-                  } else if(namaController.text != ''){
+                  } else if (namaController.text != '') {
                     user.name = namaController.text;
                     setDocument();
-                  } else if(phoneController.text != ""){
+                  } else if (phoneController.text != "") {
                     user.phoneNumber = phoneController.text;
                     setDocument();
                   }
 
-                  if(user.tipeUser == 0){
+                  if (user.tipeUser == 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => customerProfilePage()));
-                  } else if(user.tipeUser != 0){
+                  } else if (user.tipeUser != 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => sellerProfilePage()));
                   }
-
                 },
                 child: Container(
                   child: Text('Ubah Profil',
@@ -185,13 +189,10 @@ class _UpdateProfileState extends State<UpdateProfile> {
   }
 
   getDocument() async {
-    final uid = await Provider
-        .of(context)
-        .auth
-        .getCurrentUID();
+    final uid = await Provider.of(context).auth.getCurrentUID();
+    user.uid = uid;
 
-    var doc_ref = await Provider
-        .of(context)
+    var doc_ref = await Provider.of(context)
         .db
         .collection('userData')
         .document(uid)
@@ -211,17 +212,14 @@ class _UpdateProfileState extends State<UpdateProfile> {
         .then((result) {
       user.phoneNumber = result.data['phoneNumber'];
       user.name = result.data['nama'];
-      user.uid = result.data['uid'];
       user.tipeUser = result.data['tipeUser'];
-
     });
   }
 
   setDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
-    var doc_ref = await Provider
-        .of(context)
+    var doc_ref = await Provider.of(context)
         .db
         .collection('userData')
         .document(uid)
@@ -239,5 +237,4 @@ class _UpdateProfileState extends State<UpdateProfile> {
         .document(docId)
         .setData(user.toJson());
   }
-
 }

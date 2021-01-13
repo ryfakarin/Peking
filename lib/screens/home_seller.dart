@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/profile_seller.dart';
 import 'package:hehe/screens/status_history.dart';
-import 'package:hehe/services/auth.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class SellerHomePage extends StatefulWidget {
@@ -11,8 +10,6 @@ class SellerHomePage extends StatefulWidget {
 }
 
 class _SellerHomePageState extends State<SellerHomePage> {
-  final AuthService _authService = AuthService();
-
   String currentStatus = 'checkIn';
 
   GoogleMapController _mapController;
@@ -33,12 +30,14 @@ class _SellerHomePageState extends State<SellerHomePage> {
     return Scaffold(
         backgroundColor: Colors.pink,
         body: Scaffold(
+          resizeToAvoidBottomPadding: false,
           appBar: new AppBar(
             leading: null,
             toolbarHeight: _height * 0.1,
             backgroundColor: Colors.transparent,
             elevation: 0.0,
             actions: <Widget>[
+              SizedBox(width: _width * 0.05),
               Container(
                 margin: EdgeInsets.fromLTRB(0, 0, _width * 0.03, 0),
                 height: 45,
@@ -48,14 +47,14 @@ class _SellerHomePageState extends State<SellerHomePage> {
                         image: AssetImage('assets/images/logo.PNG'))),
               ),
               Container(
-                  padding:
-                      EdgeInsets.fromLTRB(0, _height * 0.04, _width * 0.3, 0),
+                  padding: EdgeInsets.only(top: _height * 0.04),
                   child: Text('Peking',
                       style: TextStyle(
                           color: Colors.green,
                           fontSize: 20,
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.bold))),
+              Spacer(),
               IconButton(
                   icon: Icon(
                     Icons.history,
@@ -69,7 +68,6 @@ class _SellerHomePageState extends State<SellerHomePage> {
                             builder: (context) => StatusAndHistory()));
                   }),
               IconButton(
-                  padding: EdgeInsets.fromLTRB(0, 0, _width * 0.1, 0),
                   icon: Icon(
                     Icons.account_circle,
                     size: 30.0,
@@ -81,6 +79,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
                         MaterialPageRoute(
                             builder: (context) => sellerProfilePage()));
                   }),
+              SizedBox(width: _width * 0.05),
             ],
           ),
           body: Container(
