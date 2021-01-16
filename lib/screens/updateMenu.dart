@@ -1,9 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/menu.dart';
-import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/profile_seller.dart';
 import 'package:hehe/widgets/provider.dart';
 
@@ -13,15 +11,13 @@ class updateMenuPage extends StatefulWidget {
 }
 
 class _updateMenuPageState extends State<updateMenuPage> {
-  UserModel user = UserModel("", "", "", null);
-  profileJualan jualan = profileJualan("");
+  profileJualan jualan = profileJualan("", null);
   menuModel menu = menuModel("", "", "", null);
 
   TextEditingController namaController = TextEditingController();
 
   getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    user.uid = uid;
 
     await Provider.of(context)
         .db
@@ -30,23 +26,45 @@ class _updateMenuPageState extends State<updateMenuPage> {
         .get()
         .then((result) {
       jualan.namaJualan = result.data['nama'];
+      jualan.namaJualan = result.data['tipe'];
     });
   }
 
   setDocument(String namaJualan) async {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    user.uid = uid;
+    String docId;
+    int tipe;
+
+    var doc_ref = await Provider.of(context)
+        .db
+        .collection('userData')
+        .document(uid)
+        .collection('profileData')
+        .getDocuments();
+    doc_ref.documents.forEach((result) {
+      docId = result.documentID;
+    });
+
+    await Provider.of(context)
+        .db
+        .collection('userData')
+        .document(uid)
+        .collection('profileData')
+        .document(docId)
+        .get()
+        .then((result) {
+      tipe = result.data['tipeUser'];
+    });
 
     await Provider.of(context)
         .db
         .collection('dataJualan')
         .document(uid)
-        .setData({'nama': namaJualan});
+        .setData({'nama': namaJualan, 'tipe': tipe});
   }
 
   setDocumentFromJson(Map<String, dynamic> toJson) async {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    user.uid = uid;
 
     await Provider.of(context)
         .db

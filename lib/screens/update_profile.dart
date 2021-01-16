@@ -13,8 +13,6 @@ class UpdateProfile extends StatefulWidget {
 class _UpdateProfileState extends State<UpdateProfile> {
   UserModel user = UserModel("", "", "", null);
 
-  String docId;
-
   TextEditingController namaController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
 
@@ -191,6 +189,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
     user.uid = uid;
+    String docId;
 
     var doc_ref = await Provider.of(context)
         .db
@@ -218,6 +217,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   setDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
+    String docId;
 
     var doc_ref = await Provider.of(context)
         .db

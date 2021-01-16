@@ -221,33 +221,4 @@ class AuthService {
     }
   }
 
-  // getDocument() async {
-  //   UserModel user = UserModel("", "", "", null);
-  //   final uid = await getCurrentUID();
-  //   String docId;
-  //
-  //   var doc_ref = await db
-  //       .collection('userData')
-  //       .document(uid)
-  //       .collection('profileData')
-  //       .getDocuments();
-  //   doc_ref.documents.forEach((result) {
-  //     docId = result.documentID;
-  //   });
-  //
-  //   await db
-  //       .collection('userData')
-  //       .document(uid)
-  //       .collection('profileData')
-  //       .document(docId)
-  //       .get()
-  //       .then((result) {
-  //     user.phoneNumber = result.data['phoneNumber'];
-  //     user.name = result.data['nama'];
-  //     user.tipeUser = result.data['tipeUser'];
-  //     user.uid = result.data['uid'];
-  //   });
-  //
-  //   return user.tipeUser;
-  // }
 }

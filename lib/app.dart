@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/login.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'package:hehe/wrapper.dart';
@@ -22,9 +21,6 @@ class App extends StatelessWidget {
                 '/loginPage' : (BuildContext context) => LoginPage(),
                 '/homeCustomer' : (BuildContext context) => CustomerHomePage(),
                 '/homeSeller' : (BuildContext context) => SellerHomePage(),
-                // '/inputUserNameReg' : (BuildContext context) => inputNamePage(flag),
-                // '/inputUserNameReg/1' : (BuildContext context) => inputNamePage(1),
-                // '/inputUserNameReg/2' : (BuildContext context) => inputNamePage(2),
               },
             )
     );

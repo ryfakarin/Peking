@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/places.dart';
-import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/profile_customer.dart';
 import 'package:hehe/screens/status_history.dart';
 import 'package:hehe/services/credentials.dart';
@@ -17,11 +16,15 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
+  // double lat;
+  // double long;
+  // Coordinates coordinates = Coordinates(lat, long);
 
   GoogleMapController _mapController;
   String searchAddress;
   final Set<Marker> _mapMarker = {};
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
+  LatLng _sellerPosition;
 
   TextEditingController _searchController = new TextEditingController();
   List<Places> _placesList = [];
@@ -57,6 +60,21 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     });
   }
 
+  getDocumentLoc() async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context)
+        .db
+        .collection('locData')
+        .document(uid)
+        .get()
+        .then((result) {
+      _sellerPosition =
+          LatLng(result.data['latitude'], result.data['longitude']);
+      print(_sellerPosition);
+    });
+  }
+
   void mapCreated(controller) {
     setState(() {
       _mapController = controller;
@@ -73,39 +91,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     });
   }
 
-  // getDocument() async {
-  //   final uid = await Provider.of(context).auth.getCurrentUID();
-  //   String docId;
-  //
-  //   var doc_ref = await Provider.of(context)
-  //       .db
-  //       .collection('userData')
-  //       .document(uid)
-  //       .collection('dataProfile')
-  //       .getDocuments();
-  //   doc_ref.documents.forEach((result) {
-  //     docId = result.documentID;
-  //   });
-  //
-  //   await Provider.of(context)
-  //       .db
-  //       .collection('userData')
-  //       .document(uid)
-  //       .collection('dataProfile')
-  //       .document(docId)
-  //       .where("tipeUser", "in", ["1", "2"])
-  //       .then((result) {
-  //     user.uid[] = result.data[uid];
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
-
-    final Set<Marker> _mapMarker = {};
-    final LatLng _currentPosition = LatLng(6.2088, 106.8456);
 
     return Scaffold(
         resizeToAvoidBottomPadding: false,
@@ -209,7 +198,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   child: new ListView.builder(
                     itemCount: _placesList.length,
                     itemBuilder: (BuildContext context, int index) =>
-                        searchResultCard(context, index),
+                        showResultCard(context, index),
                   ),
                 ),
               ]),
@@ -219,13 +208,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 height: _height * 0.3,
                 width: _width,
                 child: StreamBuilder(
-                  stream: getMenuStreamSnapshots(context),
+                  stream: getSellerStreamSnapshots(context),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return CircularProgressIndicator();
                     return ListView.builder(
                         itemCount: snapshot.data.documents.length,
                         itemBuilder: (BuildContext context, int index) =>
-                            buildMenuCard(context, snapshot.data.documents[index]));
+                            buildSellerCard(
+                                context, snapshot.data.documents[index]));
                   },
                 ),
               )
@@ -234,12 +224,20 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         )));
   }
 
-  Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
-    final uid = await Provider.of(context).auth.getCurrentUID();
+  Stream<QuerySnapshot> getSellerStreamSnapshots(BuildContext context) async* {
     yield* Firestore.instance.collection('dataJualan').snapshots();
   }
 
-  Widget buildMenuCard(BuildContext context, DocumentSnapshot document) {
+  //
+  // Stream stream1 = Firestore.instance.collection('dataJualan').snapshots();
+  // Stream stream2 = Firestore.instance.collection('userData').snapshots();
+  // Firestore.instance
+  //     .collection('list')
+  //     .where('id', isEqualTo: 'true')
+  //     .orderBy('timestamp')
+  //     .snapshots();
+
+  Widget buildSellerCard(BuildContext context, DocumentSnapshot document) {
     return new SingleChildScrollView(
       child: Card(
         color: Colors.grey[200],
@@ -249,9 +247,22 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
             children: <Widget>[
               Row(
                 children: [
-                  AutoSizeText(document['nama'], maxLines: 1, style: TextStyle(fontSize: 14),),
+                  AutoSizeText(
+                    document['nama'],
+                    maxLines: 1,
+                    style: TextStyle(fontSize: 14),
+                  ),
                   Spacer(),
                   IconButton(icon: Icon(Icons.favorite), onPressed: () {}),
+                  document['tipe'] == 1
+                      ? FlatButton(
+                          onPressed: () {},
+                          child: AutoSizeText(
+                            "Panggil",
+                            maxLines: 1,
+                            style: TextStyle(fontSize: 14),
+                          ))
+                      : FlatButton(onPressed: null)
                 ],
               ),
             ],
@@ -261,7 +272,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     );
   }
 
-  Widget searchResultCard(BuildContext context, int index) {
+  Widget showResultCard(BuildContext context, int index) {
     return Hero(
       tag: "SearchedPlace-${_placesList[index].name}",
       transitionOnUserGestures: true,

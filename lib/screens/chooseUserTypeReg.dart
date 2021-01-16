@@ -58,10 +58,8 @@ class _chooseUserTypePageState extends State<chooseUserTypePage> {
                   style: TextStyle(fontSize: 20, color: Colors.green[900]),
                 ),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => regSellerPage()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => regSellerPage()));
                 },
               ),
             ],

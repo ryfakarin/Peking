@@ -28,7 +28,6 @@ class _regCustomerPageState extends State<regCustomerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final db = Firestore.instance;
 
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
@@ -109,10 +108,9 @@ class _regCustomerPageState extends State<regCustomerPage> {
                 onPressed: () async {
                   try {
                     if (namaController.text != "" && phoneNumberCust != "") {
-                      final auth = Provider.of(context).auth;
                       String userName = namaController.text;
                       tipeUser = 0;
-                      String uid = await auth.signUpUserWithPhone(
+                      String uid = await Provider.of(context).auth.signUpUserWithPhone(
                           phoneNumberCust, context, userName, tipeUser);
                       print(userName);
                       print(phoneNumberCust);

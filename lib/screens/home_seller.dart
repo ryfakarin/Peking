@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hehe/screens/profile_seller.dart';
 import 'package:hehe/screens/status_history.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:hehe/widgets/provider.dart';
 
 class SellerHomePage extends StatefulWidget {
   @override
@@ -11,6 +13,7 @@ class SellerHomePage extends StatefulWidget {
 
 class _SellerHomePageState extends State<SellerHomePage> {
   String currentStatus = 'checkIn';
+  Position currentLocation;
 
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
@@ -19,6 +22,34 @@ class _SellerHomePageState extends State<SellerHomePage> {
   void mapCreated(controller) {
     setState(() {
       _mapController = controller;
+    });
+  }
+
+  Future<Position> locateUser() async {
+    return Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+  }
+
+  getLocation() async {
+    currentLocation = await locateUser();
+    setState(() {
+      _currentPosition =
+          LatLng(currentLocation.latitude, currentLocation.longitude);
+    });
+
+    _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(currentLocation.latitude, currentLocation.longitude),
+        zoom: 14.0)));
+
+    setDocument();
+  }
+
+  setDocument() async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context).db.collection('locData').document(uid).setData({
+      'latitude': _currentPosition.latitude,
+      'longitude': _currentPosition.longitude
     });
   }
 
@@ -143,7 +174,9 @@ class _SellerHomePageState extends State<SellerHomePage> {
             color: Colors.brown[300],
             shape: RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(30.0)),
-            onPressed: () {},
+            onPressed: () {
+              getLocation();
+            },
             child: Container(
               child: AutoSizeText('Perbarui Lokasi',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),

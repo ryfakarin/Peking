@@ -3,3 +3,10 @@ class Places{
 
   Places(this.name);
 }
+
+class Coordinates{
+  double latCoor;
+  double longCoor;
+
+  Coordinates(this.latCoor, this.longCoor);
+}

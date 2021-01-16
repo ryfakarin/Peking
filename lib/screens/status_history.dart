@@ -26,7 +26,7 @@ class StatusAndHistory extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginPage()));
+                        MaterialPageRoute(builder: (context) => CustomerHomePage()));
                   }),
               Container(
                 margin: EdgeInsets.fromLTRB(0, 25, 10, 0),

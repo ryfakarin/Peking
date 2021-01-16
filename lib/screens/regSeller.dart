@@ -14,7 +14,6 @@ class _regSellerPageState extends State<regSellerPage> {
   int radioValue = 0;
   String phoneNumberCust;
 
-  final AuthService _authService = AuthService();
   TextEditingController namaController = TextEditingController();
 
   void PhoneNumberChangeCust(
@@ -25,8 +24,6 @@ class _regSellerPageState extends State<regSellerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final db = Firestore.instance;
-
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 

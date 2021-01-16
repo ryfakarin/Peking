@@ -22,11 +22,13 @@ class menuModel {
 class profileJualan{
 
   String namaJualan;
+  int tipeJualan;
 
-  profileJualan(this.namaJualan);
+  profileJualan(this.namaJualan, this.tipeJualan);
 
   Map<String, dynamic> toJson() => {
-    'namaJualan' : namaJualan,
+    'nama' : namaJualan,
+    'tipe' : tipeJualan
   };
 
 }

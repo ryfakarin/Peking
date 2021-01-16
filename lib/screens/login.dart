@@ -1,7 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/chooseUserTypeReg.dart';
-import 'package:hehe/services/auth.dart';
 import 'package:hehe/widgets/customs.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'package:international_phone_input/international_phone_input.dart';
@@ -14,14 +14,12 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
-  final AuthService _authService = AuthService();
   var _formKey = GlobalKey<FormState>();
 
   String phoneNumber = '';
 
   bool validate() {
     final form = _formKey.currentState;
-    form.save();
     if (form.validate()) {
       form.save();
       return true;

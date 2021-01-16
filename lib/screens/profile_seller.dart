@@ -15,10 +15,10 @@ class sellerProfilePage extends StatefulWidget {
 
 class _sellerProfilePageState extends State<sellerProfilePage> {
   UserModel user = UserModel("", "", "", null);
-  String docId;
 
   getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
+    String docId;
 
     var doc_ref = await Provider.of(context)
         .db
