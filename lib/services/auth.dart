@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_customer.dart';
 import 'package:hehe/screens/home_seller.dart';
+import 'package:hehe/screens/login.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -47,7 +48,7 @@ class AuthService {
             if (tipeUser == 0) {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => CustomerHomePage()));
-            } else if (tipeUser != 0) {
+            } else {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => SellerHomePage()));
             }
@@ -61,56 +62,57 @@ class AuthService {
         codeSent: (String verificationId, [int forceResendToken]) {
           final _codeController = TextEditingController();
           showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => AlertDialog(
-                    title: Text("Kode Verifikasi Anda"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        TextField(
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          controller: _codeController,
-                        )
-                      ],
-                    ),
-                    actions: <Widget>[
-                      FlatButton(
-                        color: Colors.lightGreen,
-                        child: Text("Submit"),
-                        textColor: Colors.white,
-                        onPressed: () {
-                          var _credential = PhoneAuthProvider.getCredential(
-                              verificationId: verificationId,
-                              smsCode: _codeController.text.trim());
-                          _auth
-                              .signInWithCredential(_credential)
-                              .then((AuthResult result) async {
-                            String uid = await result.user.uid;
-                            createUserToDatabase(
-                                uid, userName, phone, tipeUser);
-                            if (tipeUser == 0) {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          CustomerHomePage()));
-                            } else if (tipeUser != 0) {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SellerHomePage()));
-                            }
-                          }).catchError((e) {
-                            return "error";
-                          });
-                        },
-                      )
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: Text("Kode Verifikasi Anda"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
                     ],
-                  ));
+                    controller: _codeController,
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  color: Colors.lightGreen,
+                  child: Text("Submit"),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    var _credential = PhoneAuthProvider.getCredential(
+                        verificationId: verificationId,
+                        smsCode: _codeController.text.trim());
+                    _auth.signInWithCredential(_credential).then(
+                      (AuthResult result) async {
+                        String uid = await result.user.uid;
+                        createUserToDatabase(uid, userName, phone, tipeUser);
+                        if (tipeUser == 0) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CustomerHomePage()));
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SellerHomePage()));
+                        }
+                      },
+                    ).catchError(
+                      (e) {
+                        return "error";
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           verificationId = verificationId;
@@ -138,57 +140,63 @@ class AuthService {
         codeSent: (String verificationId, [int forceResendToken]) {
           final _codeController = TextEditingController();
           showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => AlertDialog(
-                    title: Text("Kode Verifikasi Anda"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        TextField(
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          controller: _codeController,
-                        )
-                      ],
-                    ),
-                    actions: <Widget>[
-                      FlatButton(
-                        color: Colors.lightGreen,
-                        child: Text("Submit"),
-                        textColor: Colors.white,
-                        onPressed: () {
-                          var _credential = PhoneAuthProvider.getCredential(
-                              verificationId: verificationId,
-                              smsCode: _codeController.text.trim());
-                          _auth
-                              .signInWithCredential(_credential)
-                              .then((AuthResult result) async {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CustomerHomePage()));
-                            // int tipeUser = getDocument();
-                            // if (getDocument == 0) {
-                            //   Navigator.push(
-                            //       context,
-                            //       MaterialPageRoute(
-                            //           builder: (context) => CustomerHomePage()));
-                            // } else if (getDocument == 1 || getDocument == 2){
-                            //   Navigator.push(
-                            //       context,
-                            //       MaterialPageRoute(
-                            //           builder: (context) => CustomerHomePage()));
-                            // }
-                          }).catchError((e) {
-                            print("error");
-                          });
-                        },
-                      )
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: Text("Kode Verifikasi Anda"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
                     ],
-                  ));
+                    controller: _codeController,
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  color: Colors.red[100],
+                  child: Text(
+                    "Kembali",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => LoginPage()));
+                  },
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+                FlatButton(
+                  color: Colors.lightGreen,
+                  child: Text("Submit"),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    var _credential = PhoneAuthProvider.getCredential(
+                        verificationId: verificationId,
+                        smsCode: _codeController.text.trim());
+                    _auth.signInWithCredential(_credential).then(
+                      (AuthResult result) async {
+                        navigateUser(phone, context);
+                      },
+                    ).catchError(
+                      (e) {
+                        print("error");
+                      },
+                    );
+                  },
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+              ],
+            ),
+          );
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           verificationId = verificationId;
@@ -206,6 +214,27 @@ class AuthService {
     }
   }
 
+  void navigateUser(String phoneNumber, BuildContext context) async {
+    int tipeUser;
+
+    await db
+        .collection('userData')
+        .where('phoneNumber', isEqualTo: phoneNumber)
+        .getDocuments()
+        .then((ref) {
+      if (ref.documents.length > 0) {
+        tipeUser = ref.documents[0].data['tipeUser'];
+        if (tipeUser == 0) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => CustomerHomePage()));
+        } else {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => SellerHomePage()));
+        }
+      }
+    });
+  }
+
   void createUserToDatabase(
       String uidUser, String namaUser, String phoneUser, int tipeUser) async {
     UserModel userModel = new UserModel(uidUser, namaUser, phoneUser, tipeUser);
@@ -219,5 +248,4 @@ class AuthService {
       print(e);
     }
   }
-
 }

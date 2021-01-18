@@ -95,11 +95,32 @@ class _LoginPageState extends State<LoginPage>
                 padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
                 color: Colors.orangeAccent[400],
                 shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(30.0)),
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
                 onPressed: () async {
-                  var result = await Provider.of(context).auth.signInUserWithPhone(
-                      phoneNumber, context);
-                  if (phoneNumber == "" || result == 'error') {
+                  if (phoneNumber != '') {
+                    await Provider.of(context)
+                        .db
+                        .collection('userData')
+                        .where('phoneNumber', isEqualTo: phoneNumber)
+                        .getDocuments()
+                        .then((ref) {
+                      if (ref.documents.length > 0) {
+                        Provider.of(context)
+                            .auth
+                            .signInUserWithPhone(phoneNumber, context);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => CustomDialog(
+                              title: "Nomor anda belum terdaftar",
+                              description: " ",
+                              primaryButtonText: "OK",
+                              primaryButtonRoute: "/loginPage"),
+                        );
+                      }
+                    });
+                  } else {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) => CustomDialog(

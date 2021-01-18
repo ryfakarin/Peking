@@ -46,7 +46,7 @@ class CustomDialog extends StatelessWidget {
                 SizedBox(height: 20),
                 AutoSizeText(
                   title,
-                  maxLines: 2,
+                  maxLines: 1,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: Colors.black,
