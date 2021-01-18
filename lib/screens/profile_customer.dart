@@ -18,22 +18,10 @@ class _customerProfilePageState extends State<customerProfilePage> {
     final uid = await Provider.of(context).auth.getCurrentUID();
     String docId;
 
-    var doc_ref = await Provider.of(context)
-        .db
-        .collection('userData')
-        .document(uid)
-        .collection('profileData')
-        .getDocuments();
-    doc_ref.documents.forEach((result) {
-      docId = result.documentID;
-    });
-
     await Provider.of(context)
         .db
         .collection('userData')
         .document(uid)
-        .collection('profileData')
-        .document(docId)
         .get()
         .then((result) {
       user.phoneNumber = result.data['phoneNumber'];
@@ -81,9 +69,11 @@ class _customerProfilePageState extends State<customerProfilePage> {
       ),
       body: SingleChildScrollView(
         child: Container(
+          height: _height*0.6,
           width: _width,
           child: Column(
             children: <Widget>[
+              Spacer(),
               Container(
                 height: _height * 0.2,
                 width: _width * 0.6,
@@ -95,7 +85,7 @@ class _customerProfilePageState extends State<customerProfilePage> {
                         fit: BoxFit.fitWidth,
                         image: AssetImage('assets/images/brown.png'))),
               ),
-              SizedBox(height: _height * 0.02),
+              SizedBox(height: _height * 0.04),
               FutureBuilder(
                 future: getDocument(),
                 builder: (context, snapshot) {
@@ -125,17 +115,7 @@ class _customerProfilePageState extends State<customerProfilePage> {
                   }
                 },
               ),
-              SizedBox(height: _height * 0.05),
-              Container(
-                padding: EdgeInsets.only(right: _width * 0.6),
-                child: AutoSizeText("Favorites",
-                    style: TextStyle(
-                        color: Colors.brown[800],
-                        fontSize: 20,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold)),
-              ),
-              SizedBox(height: _height * 0.05),
+              SizedBox(height: _height * 0.04),
               RaisedButton(
                 textColor: Colors.white,
                 padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
@@ -152,6 +132,7 @@ class _customerProfilePageState extends State<customerProfilePage> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 ),
               ),
+              Spacer(),
             ],
           ),
         ),

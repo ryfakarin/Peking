@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/places.dart';
 import 'package:hehe/screens/profile_customer.dart';
-import 'package:hehe/screens/status_history.dart';
+import 'package:hehe/screens/status_history_customer.dart';
 import 'package:hehe/services/credentials.dart';
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoder/geocoder.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:hehe/model/panggilan.dart';
 import 'package:hehe/widgets/provider.dart';
 
 class CustomerHomePage extends StatefulWidget {
@@ -16,24 +18,56 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
-  // double lat;
-  // double long;
-  // Coordinates coordinates = Coordinates(lat, long);
+  Panggilan panggilan = Panggilan("", "", null);
 
-  GoogleMapController _mapController;
-  String searchAddress;
   final Set<Marker> _mapMarker = {};
-  LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
+  LatLng _currentPosition = LatLng(-6.2088, 106.8456);
   LatLng _sellerPosition;
+  GoogleMapController _mapController;
 
-  TextEditingController _searchController = new TextEditingController();
+  String searchAddress;
   List<Places> _placesList = [];
+  TextEditingController _searchController = new TextEditingController();
+
+  void mapCreated(controller) {
+    setState(() {
+      _mapController = controller;
+    });
+  }
+
+  Future<Position> locateUser() async {
+    return Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+  }
+
+  getLocation() async {
+    _currentPosition = (await locateUser()) as LatLng;
+    setState(() {
+      _currentPosition =
+          LatLng(_currentPosition.latitude, _currentPosition.longitude);
+    });
+
+    _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(_currentPosition.latitude, _currentPosition.longitude),
+        zoom: 14.0)));
+
+    setDocument();
+  }
+
+  setDocument() async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context).db.collection('locData').document(uid).setData({
+      'latitude': _currentPosition.latitude,
+      'longitude': _currentPosition.longitude
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     _mapMarker.add(Marker(
-      markerId: MarkerId("-7.8032076, 110.3573354"),
+      markerId: MarkerId("Jakarta"),
       position: _currentPosition,
       icon: BitmapDescriptor.defaultMarker,
     ));
@@ -42,12 +76,13 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   void getLocationResults(String input) async {
     String baseUrl =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json';
-    String type = '(cities)';
+    String type = 'address';
 
     String req = '$baseUrl?input=$input&key=$PLACES_API_KEY&type=$type';
     Response response = await Dio().get(req);
 
     final predictions = response.data['predictions'];
+    print(predictions);
     List<Places> _displayedResults = [];
 
     for (var i = 0; i < predictions.length; i++) {
@@ -60,25 +95,17 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     });
   }
 
-  getDocumentLoc() async {
-    final uid = await Provider.of(context).auth.getCurrentUID();
+  void setData() async{
+
+    final custId = await Provider.of(context).auth.getCurrentUID();
+    panggilan.custId = custId;
+
+    panggilan.statusPanggilan = 1;
 
     await Provider.of(context)
         .db
-        .collection('locData')
-        .document(uid)
-        .get()
-        .then((result) {
-      _sellerPosition =
-          LatLng(result.data['latitude'], result.data['longitude']);
-      print(_sellerPosition);
-    });
-  }
-
-  void mapCreated(controller) {
-    setState(() {
-      _mapController = controller;
-    });
+        .collection('panggilanData')
+        .setData(panggilan.toJson());
   }
 
   searchAndNavigate(String searchString) {
@@ -87,7 +114,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           CameraPosition(
               target: LatLng(result.first.coordinates.latitude,
                   result.first.coordinates.longitude),
-              zoom: 14.0)));
+              zoom: 10.0)));
     });
   }
 
@@ -131,7 +158,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => StatusAndHistory()));
+                          builder: (context) => StatusAndHistoryCust()));
                 }),
             IconButton(
                 padding: EdgeInsets.fromLTRB(0, 0, _width * 0.1, 0),
@@ -228,15 +255,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     yield* Firestore.instance.collection('dataJualan').snapshots();
   }
 
-  //
-  // Stream stream1 = Firestore.instance.collection('dataJualan').snapshots();
-  // Stream stream2 = Firestore.instance.collection('userData').snapshots();
-  // Firestore.instance
-  //     .collection('list')
-  //     .where('id', isEqualTo: 'true')
-  //     .orderBy('timestamp')
-  //     .snapshots();
-
   Widget buildSellerCard(BuildContext context, DocumentSnapshot document) {
     return new SingleChildScrollView(
       child: Card(
@@ -256,12 +274,19 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   IconButton(icon: Icon(Icons.favorite), onPressed: () {}),
                   document['tipe'] == 1
                       ? FlatButton(
-                          onPressed: () {},
                           child: AutoSizeText(
                             "Panggil",
                             maxLines: 1,
                             style: TextStyle(fontSize: 14),
-                          ))
+                          ),
+                          onPressed: () {
+                            panggilan.sellerId = document.documentID;
+                            setData();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => StatusAndHistoryCust()));
+                          })
                       : FlatButton(onPressed: null)
                 ],
               ),

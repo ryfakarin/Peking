@@ -214,8 +214,7 @@ class AuthService {
       await db
           .collection("userData")
           .document(uidUser)
-          .collection("profileData")
-          .add(userModel.toJson());
+          .setData(userModel.toJson());
     } on Exception catch (e) {
       print(e);
     }

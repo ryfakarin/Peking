@@ -18,24 +18,11 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
 
   getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    String docId;
-
-    var doc_ref = await Provider.of(context)
-        .db
-        .collection('userData')
-        .document(uid)
-        .collection('profileData')
-        .getDocuments();
-    doc_ref.documents.forEach((result) {
-      docId = result.documentID;
-    });
 
     await Provider.of(context)
         .db
         .collection('userData')
         .document(uid)
-        .collection('profileData')
-        .document(docId)
         .get()
         .then((result) {
       user.phoneNumber = result.data['phoneNumber'];
@@ -236,6 +223,7 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
       ),
     );
   }
+
   Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
     final uid = await Provider.of(context).auth.getCurrentUID();
     yield* Firestore.instance.collection('dataJualan').document(uid).collection('menus').snapshots();

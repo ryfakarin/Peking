@@ -1,9 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/profile_seller.dart';
-import 'package:hehe/screens/status_history.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hehe/screens/status_history_seller.dart';
 import 'package:hehe/widgets/provider.dart';
 
 class SellerHomePage extends StatefulWidget {
@@ -96,7 +96,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => StatusAndHistory()));
+                            builder: (context) => statusAndHistorySeller()));
                   }),
               IconButton(
                   icon: Icon(
