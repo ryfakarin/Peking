@@ -43,10 +43,10 @@ class CustomDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                SizedBox(height: 20),
+                SizedBox(height: 22),
                 AutoSizeText(
                   title,
-                  maxLines: 1,
+                  maxLines: 2,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: Colors.black,
@@ -56,7 +56,7 @@ class CustomDialog extends StatelessWidget {
                 SizedBox(height: 20),
                 AutoSizeText(
                   description,
-                  maxLines: 4,
+                  maxLines: 5,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     color: Colors.black54,

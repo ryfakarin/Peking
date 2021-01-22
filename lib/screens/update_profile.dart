@@ -11,10 +11,10 @@ class UpdateProfile extends StatefulWidget {
 }
 
 class _UpdateProfileState extends State<UpdateProfile> {
-  UserModel user = UserModel("", "", "", null);
+  UserModel _user = UserModel("", "", "", null);
 
-  TextEditingController namaController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
+  TextEditingController _namaController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +37,12 @@ class _UpdateProfileState extends State<UpdateProfile> {
                   color: Colors.green,
                 ),
                 onPressed: () {
-                  if (user.tipeUser == 0) {
+                  if (_user.tipeUser == 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => customerProfilePage()));
-                  } else if (user.tipeUser != 0) {
+                  } else if (_user.tipeUser != 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -92,7 +92,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 future: getDocument(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return inputBox(namaController, user.name);
+                    return inputBox(_namaController, _user.name);
                   } else {
                     return CircularProgressIndicator();
                   }
@@ -112,7 +112,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 future: getDocument(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return inputBox(phoneController, user.phoneNumber);
+                    return inputBox(_phoneController, _user.phoneNumber);
                   } else {
                     return CircularProgressIndicator();
                   }
@@ -127,24 +127,24 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     borderRadius: new BorderRadius.circular(30.0)),
                 // validasi untuk nanti ke seller atau customer
                 onPressed: () async {
-                  if (namaController.text != '' && phoneController.text != "") {
-                    user.name = namaController.text;
-                    user.phoneNumber = phoneController.text;
+                  if (_namaController.text != '' && _phoneController.text != "") {
+                    _user.name = _namaController.text;
+                    _user.phoneNumber = _phoneController.text;
                     setDocument();
-                  } else if (namaController.text != '') {
-                    user.name = namaController.text;
+                  } else if (_namaController.text != '') {
+                    _user.name = _namaController.text;
                     setDocument();
-                  } else if (phoneController.text != "") {
-                    user.phoneNumber = phoneController.text;
+                  } else if (_phoneController.text != "") {
+                    _user.phoneNumber = _phoneController.text;
                     setDocument();
                   }
 
-                  if (user.tipeUser == 0) {
+                  if (_user.tipeUser == 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => customerProfilePage()));
-                  } else if (user.tipeUser != 0) {
+                  } else if (_user.tipeUser != 0) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -177,18 +177,17 @@ class _UpdateProfileState extends State<UpdateProfile> {
         right: BorderSide(color: Colors.lightGreen),
       )),
       child: TextFormField(
-        controller: controller,
+        controller: TextEditingController(text: hintText),
         decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey[400])),
+        ),
       ),
     );
   }
 
   getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    user.uid = uid;
+    _user.uid = uid;
 
     await Provider.of(context)
         .db
@@ -196,9 +195,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
         .document(uid)
         .get()
         .then((result) {
-      user.phoneNumber = result.data['phoneNumber'];
-      user.name = result.data['nama'];
-      user.tipeUser = result.data['tipeUser'];
+      _user.phoneNumber = result.data['phoneNumber'];
+      _user.name = result.data['nama'];
+      _user.tipeUser = result.data['tipeUser'];
     });
   }
 
@@ -210,6 +209,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
         .db
         .collection('userData')
         .document(uid)
-        .setData(user.toJson());
+        .setData(_user.toJson());
   }
 }

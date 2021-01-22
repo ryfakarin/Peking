@@ -2,8 +2,10 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hehe/model/panggilan.dart';
 import 'package:hehe/screens/home_seller.dart';
+import 'package:hehe/screens/profile_seller.dart';
 import 'package:hehe/widgets/provider.dart';
 
 class statusAndHistorySeller extends StatefulWidget {
@@ -12,18 +14,78 @@ class statusAndHistorySeller extends StatefulWidget {
 }
 
 class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
-  String cardTitle = '';
+  String _cardTitle = '';
+  String currDocPanggilan;
 
+  Position _currentLocation;
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
 
-  Panggilan panggilan = Panggilan("", "", null);
+  Panggilan _panggilan = Panggilan("", "", null);
+  Panggilan _currPanggilan = Panggilan("", "", null);
 
-  void mapCreated(controller) {
+  _mapCreated(controller) {
     setState(() {
       _mapController = controller;
     });
+  }
+
+  Future<Position> _locateUser() async {
+    return Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+  }
+
+  _getLocation() async {
+    _currentLocation = await _locateUser();
+    setState(() {
+      _currentPosition =
+          LatLng(_currentLocation.latitude, _currentLocation.longitude);
+    });
+
+    _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(_currentLocation.latitude, _currentLocation.longitude),
+        zoom: 16.0)));
+
+    _setDocument();
+    _setMarker();
+  }
+
+  _setDocument() async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context).db.collection('locData').document(uid).setData({
+      'latitude': _currentPosition.latitude,
+      'longitude': _currentPosition.longitude
+    });
+  }
+
+  _setMarker() async {
+    List<String> user = List<String>();
+    List<String> userWithLoc = List<String>();
+
+    QuerySnapshot snap = await Firestore.instance
+        .collection('userData')
+        .where('tipeUser', isEqualTo: 0)
+        .getDocuments();
+
+    for (int i = 0; i < snap.documents.length; i++) {
+      user.add(snap.documents[i].documentID);
+    }
+
+    QuerySnapshot snaps =
+        await Firestore.instance.collection('locData').getDocuments();
+
+    for (int i = 0; i < snaps.documents.length; i++) {
+      if (user.contains(snaps.documents[i].documentID)) {
+        userWithLoc.add(snaps.documents[i].documentID);
+        _mapMarker.add(Marker(
+          markerId: MarkerId(snaps.documents[i].documentID),
+          position: LatLng(snaps.documents[i].data['latitude'],
+              snaps.documents[i].data['longitude']),
+        ));
+      }
+    }
   }
 
   @override
@@ -79,7 +141,12 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                 size: 30.0,
                 color: Colors.green,
               ),
-              onPressed: null),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => sellerProfilePage()));
+              }),
         ],
       ),
       body: SingleChildScrollView(
@@ -92,7 +159,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   children: <Widget>[
                     Padding(padding: EdgeInsets.only(left: 20, bottom: 20)),
                     AutoSizeText(
-                      'Histori Pemanggilan',
+                      'Daftar Pemanggilan',
                       maxLines: 1,
                       style: TextStyle(
                           color: Colors.green[800],
@@ -101,26 +168,31 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                     )
                   ],
                 ),
-                Container(
-                  height: _height * 0.75,
-                  width: _width,
-                  // color: Colors.purple,
-                  child: StreamBuilder(
-                      stream: getPanggilanStreamSnapshots(context),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData)
+                SizedBox(
+                  height: _height * 0.02,
+                ),
+                SingleChildScrollView(
+                  child: Container(
+                    height: _height * 0.65,
+                    width: _width,
+                    child: StreamBuilder(
+                      stream: _getPanggilanStreamSnapshots(context),
+                      builder: (context, sn) {
+                        if (!sn.hasData)
                           return Row(children: <Widget>[
                             Spacer(),
                             AutoSizeText('Tidak ada data yang tersedia'),
                             Spacer(),
                           ]);
                         return ListView.builder(
-                            itemCount: snapshot.data.documents.length,
+                            itemCount: sn.data.documents.length,
                             itemBuilder: (BuildContext context, int index) =>
-                                buildStatusCards(
-                                    context, snapshot.data.documents[index]));
-                      }),
-                )
+                                _buildStatusCards(
+                                    context, sn.data.documents[index]));
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -129,16 +201,17 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
     );
   }
 
-  Stream<QuerySnapshot> getPanggilanStreamSnapshots(
+  Stream<QuerySnapshot> _getPanggilanStreamSnapshots(
       BuildContext context) async* {
     final uid = await Provider.of(context).auth.getCurrentUID();
     yield* Firestore.instance
         .collection('panggilanData')
         .where('sellerId', isEqualTo: uid)
+        .orderBy('statusPanggilan')
         .snapshots();
   }
 
-  void setData(String docId, Map<String, dynamic> json) async {
+  _setData(String docId, Map<String, dynamic> json) async {
     await Provider.of(context)
         .db
         .collection('panggilanData')
@@ -146,47 +219,53 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         .setData(json);
   }
 
-  getUserSnapshots(String userId) async {
+  _getUserSnapshots(String userId) async {
     await Firestore.instance
         .collection('userData')
         .document(userId)
         .get()
-        .then((value) => cardTitle = value.data['nama']);
+        .then((value) => _cardTitle = value.data['nama']);
   }
 
-  Widget buildStatusCards(BuildContext context, DocumentSnapshot document) {
-    return SingleChildScrollView(
-      child: Card(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        margin: EdgeInsets.all(10.0),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: FutureBuilder(
-            future: getUserSnapshots(document['custId']),
-            builder: (context, snapshot) {
-              return ExpansionTile(
-                title: AutoSizeText(
-                  cardTitle,
+  _buildStatusCards(BuildContext context, DocumentSnapshot document) {
+    return Card(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      margin: EdgeInsets.all(10.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ExpansionTile(
+          title: FutureBuilder(
+              future: Firestore.instance
+                  .collection('userData')
+                  .document(document['custId'])
+                  .get(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return Row(children: <Widget>[
+                    Spacer(),
+                    AutoSizeText('Tidak ada data yang tersedia'),
+                    Spacer(),
+                  ]);
+                return AutoSizeText(
+                  snapshot.data['nama'],
                   maxLines: 1,
                   style: TextStyle(fontSize: 16),
-                ),
-                children: <Widget>[
-                  buildRow1(document),
-                  buildTolakPanggilan(document),
-                  buildSellerBerangkat(document),
-                  buildSellerPerjalanan(document),
-                  buildPanggilanSelesai(document)
-                ],
-              );
-            },
-          ),
+                );
+              }),
+          children: <Widget>[
+            _buildRow1(document),
+            _buildTolakPanggilan(document),
+            _buildSellerBerangkat(document),
+            _buildSellerPerjalanan(document),
+            _buildPanggilanSelesai(document)
+          ],
         ),
       ),
     );
   }
 
-  Widget buildPanggilanSelesai(DocumentSnapshot document) {
+  Widget _buildPanggilanSelesai(DocumentSnapshot document) {
     return document['statusPanggilan'] == 4
         ? Card(
             color: Colors.green[50],
@@ -211,7 +290,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget buildSellerPerjalanan(DocumentSnapshot document) {
+  Widget _buildSellerPerjalanan(DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 &&
             document['statusPanggilan'] != 2 &&
             document['statusPanggilan'] != 6
@@ -232,7 +311,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   mapType: MapType.normal,
                   markers: _mapMarker,
                   myLocationEnabled: true,
-                  onMapCreated: mapCreated,
+                  onMapCreated: _mapCreated,
                 ),
               ),
               SizedBox(
@@ -256,7 +335,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget buildSellerBerangkat(DocumentSnapshot document) {
+  Widget _buildSellerBerangkat(DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 && document['statusPanggilan'] != 6
         ? ExpansionTile(
             title: AutoSizeText(
@@ -291,7 +370,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget buildTolakPanggilan(DocumentSnapshot document) {
+  Widget _buildTolakPanggilan(DocumentSnapshot document) {
     return document['statusPanggilan'] != 6
         ? Padding(
             padding: EdgeInsets.zero,
@@ -313,7 +392,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
           );
   }
 
-  ExpansionTile buildRow1(DocumentSnapshot document) {
+  ExpansionTile _buildRow1(DocumentSnapshot document) {
     return ExpansionTile(
       title: AutoSizeText(
         'Konfirmasi pemanggilan',
@@ -331,18 +410,18 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
             mapType: MapType.normal,
             markers: _mapMarker,
             myLocationEnabled: true,
-            onMapCreated: mapCreated,
+            onMapCreated: _mapCreated,
           ),
         ),
         SizedBox(height: 10),
         document['statusPanggilan'] == 1
-            ? buildButtonTerimaPanggilan(document)
+            ? _buildButtonTerimaPanggilan(document)
             : Padding(padding: EdgeInsets.zero),
       ],
     );
   }
 
-  Row buildButtonTerimaPanggilan(DocumentSnapshot document) {
+  Row _buildButtonTerimaPanggilan(DocumentSnapshot document) {
     return Row(
       children: <Widget>[
         Spacer(),
@@ -376,9 +455,9 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
 
   void toBeSendtoDb(DocumentSnapshot document, int status) {
     String docId = document.documentID;
-    panggilan.custId = document['custId'];
-    panggilan.sellerId = document['sellerId'];
-    panggilan.statusPanggilan = status;
-    setData(docId, panggilan.toJson());
+    _panggilan.custId = document['custId'];
+    _panggilan.sellerId = document['sellerId'];
+    _panggilan.statusPanggilan = status;
+    _setData(docId, _panggilan.toJson());
   }
 }

@@ -5,7 +5,6 @@ import 'package:hehe/screens/chooseUserTypeReg.dart';
 import 'package:hehe/widgets/customs.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'package:international_phone_input/international_phone_input.dart';
-import 'home_customer.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -135,21 +134,6 @@ class _LoginPageState extends State<LoginPage>
                   child: AutoSizeText('Log In',
                       style:
                           TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              SizedBox(height: _height * 0.01),
-              Container(
-                child: TextButton(
-                  onPressed: () {
-                    Provider.of(context).auth.signInAnon();
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CustomerHomePage()));
-                  },
-                  child: AutoSizeText('Masuk sebagai tamu',
-                      style: TextStyle(
-                          color: Colors.lightGreen[700], fontSize: 15)),
                 ),
               ),
               SizedBox(height: _height * 0.03),

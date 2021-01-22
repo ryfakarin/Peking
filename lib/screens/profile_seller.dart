@@ -14,9 +14,9 @@ class sellerProfilePage extends StatefulWidget {
 }
 
 class _sellerProfilePageState extends State<sellerProfilePage> {
-  UserModel user = UserModel("", "", "", null);
+  UserModel _user = UserModel("", "", "", null);
 
-  getDocument() async {
+  _getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
     await Provider.of(context)
@@ -25,8 +25,8 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
         .document(uid)
         .get()
         .then((result) {
-      user.phoneNumber = result.data['phoneNumber'];
-      user.name = result.data['nama'];
+      _user.phoneNumber = result.data['phoneNumber'];
+      _user.name = result.data['nama'];
     });
   }
 
@@ -86,10 +86,10 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                 ),
                 SizedBox(height: _height * 0.02),
                 FutureBuilder(
-                  future: getDocument(),
+                  future: _getDocument(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      return AutoSizeText(user.name,
+                      return AutoSizeText(_user.name,
                           style: TextStyle(
                               color: Colors.black,
                               fontSize: 30,
@@ -101,10 +101,10 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                 ),
                 SizedBox(height: _height * 0.01),
                 FutureBuilder(
-                  future: getDocument(),
+                  future: _getDocument(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      return AutoSizeText(user.phoneNumber,
+                      return AutoSizeText(_user.phoneNumber,
                           style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 18,
@@ -138,40 +138,6 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                   children: [
                     Container(
                       padding: EdgeInsets.only(left: 30, right: 10),
-                      child: AutoSizeText('Foto',
-                          style: TextStyle(
-                              color: Colors.brown[800],
-                              fontSize: 20,
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                    RaisedButton(
-                      textColor: Colors.black,
-                      padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
-                      color: Colors.white60,
-                      shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.black, width: 2),
-                          borderRadius: new BorderRadius.circular(30.0)),
-                      onPressed: () {},
-                      child: Container(
-                        child: AutoSizeText('Ubah Foto',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    SizedBox(height: _height * 0.05),
-                    AutoSizeText('Tidak ada foto yang tersedia'),
-                  ],
-                ),
-                SizedBox(height: _height * 0.05),
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.only(left: 30, right: 10),
                       child: AutoSizeText('Menu',
                           style: TextStyle(
                               color: Colors.brown[800],
@@ -179,6 +145,7 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                               fontStyle: FontStyle.italic,
                               fontWeight: FontWeight.bold)),
                     ),
+                    Spacer(),
                     RaisedButton(
                       textColor: Colors.black,
                       padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
@@ -198,11 +165,14 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                                 fontSize: 14, fontWeight: FontWeight.bold)),
                       ),
                     ),
+                    SizedBox(
+                      width: _width * 0.05,
+                    )
                   ],
                 ),
                 Container(
                   padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                  height: _height * 0.4,
+                  height: _height * 0.6,
                   width: _width,
                   child: StreamBuilder(
                     stream: getMenuStreamSnapshots(context),
@@ -226,31 +196,27 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
 
   Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    yield* Firestore.instance.collection('dataJualan').document(uid).collection('menus').snapshots();
+    yield* Firestore.instance
+        .collection('dataJualan')
+        .document(uid)
+        .collection('menus')
+        .snapshots();
   }
 
   Widget buildMenuCard(BuildContext context, DocumentSnapshot document) {
     return new SingleChildScrollView(
       child: Card(
-        child: InkWell(
-          child: Padding(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: <Widget>[
-                Text(document['namaMakanan']),
-                Spacer(),
-                Text(document['hargaMakanan']),
-                Spacer(),
-                Text(document['satuan'].toString()),
-                Spacer(),
-                Text(document['satuanMakanan']),
-              ],
-            ),
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Row(
+            children: <Widget>[
+              Text(document['namaMakanan']),
+              Spacer(),
+              Text('Rp. ' + document['hargaMakanan'])
+            ],
           ),
-          onTap: () {},
         ),
       ),
     );
   }
-
 }

@@ -1,7 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
+import 'package:hehe/widgets/customs.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:hehe/widgets/provider.dart';
 
@@ -13,22 +13,21 @@ class regCustomerPage extends StatefulWidget {
 }
 
 class _regCustomerPageState extends State<regCustomerPage> {
-  int tipeUser;
-  String phoneNumberCust;
+  int _tipeUser;
+  String _phoneNumberCust;
 
-  TextEditingController namaController = TextEditingController();
+  TextEditingController _namaController = TextEditingController();
 
-  UserModel userModel;
+  UserModel _userModel;
 
-  void PhoneNumberChangeCust(
+  _PhoneNumberChangeCust(
       String number, String internationalizedPhoneNumber, String isCode) {
-    phoneNumberCust = internationalizedPhoneNumber;
-    print(phoneNumberCust);
+    _phoneNumberCust = internationalizedPhoneNumber;
+    print(_phoneNumberCust);
   }
 
   @override
   Widget build(BuildContext context) {
-
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
 
@@ -67,7 +66,7 @@ class _regCustomerPageState extends State<regCustomerPage> {
                   bottom: BorderSide(color: Colors.teal[900]),
                 )),
                 child: TextFormField(
-                  controller: namaController,
+                  controller: _namaController,
                   decoration: InputDecoration.collapsed(hintText: 'Nama anda'),
                 ),
               ),
@@ -88,8 +87,8 @@ class _regCustomerPageState extends State<regCustomerPage> {
                 child: InternationalPhoneInput(
                     decoration:
                         InputDecoration.collapsed(hintText: '(813) 111-2323'),
-                    onPhoneNumberChange: PhoneNumberChangeCust,
-                    initialPhoneNumber: phoneNumberCust,
+                    onPhoneNumberChange: _PhoneNumberChangeCust,
+                    initialPhoneNumber: _phoneNumberCust,
                     initialSelection: 'ID',
                     enabledCountries: ['+62'],
                     showCountryFlags: false),
@@ -107,13 +106,33 @@ class _regCustomerPageState extends State<regCustomerPage> {
                 shape: CircleBorder(),
                 onPressed: () async {
                   try {
-                    if (namaController.text != "" && phoneNumberCust != "") {
-                      String userName = namaController.text;
-                      tipeUser = 0;
-                      String uid = await Provider.of(context).auth.signUpUserWithPhone(
-                          phoneNumberCust, context, userName, tipeUser);
+                    if (_namaController.text != "" && _phoneNumberCust != "") {
+                      String userName = _namaController.text;
+                      _tipeUser = 0;
+                      await Provider.of(context)
+                          .db
+                          .collection('userData')
+                          .where('phoneNumber', isEqualTo: _phoneNumberCust)
+                          .getDocuments()
+                          .then((ref) async {
+                        if (ref.documents.length > 0) {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => CustomDialog(
+                                title: "Nomor anda sudah terdaftar",
+                                description: " ",
+                                primaryButtonText: "OK",
+                                primaryButtonRoute: "/regCust"),
+                          );
+                        } else {
+                          String uid = await Provider.of(context)
+                              .auth
+                              .signUpUserWithPhone(
+                                  _phoneNumberCust, context, userName, _tipeUser);
+                        }
+                      });
                       print(userName);
-                      print(phoneNumberCust);
+                      print(_phoneNumberCust);
                     }
                   } on Exception catch (e) {
                     print(e);

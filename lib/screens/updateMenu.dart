@@ -11,12 +11,12 @@ class updateMenuPage extends StatefulWidget {
 }
 
 class _updateMenuPageState extends State<updateMenuPage> {
-  profileJualan jualan = profileJualan("", null);
-  menuModel menu = menuModel("", "", "", null);
+  profileJualan _jualan = profileJualan("", null);
+  menuModel _menu = menuModel("", "");
 
-  TextEditingController namaController = TextEditingController();
+  TextEditingController _namaController = TextEditingController();
 
-  getDocument() async {
+  _getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
     await Provider.of(context)
@@ -25,12 +25,12 @@ class _updateMenuPageState extends State<updateMenuPage> {
         .document(uid)
         .get()
         .then((result) {
-      jualan.namaJualan = result.data['nama'];
-      jualan.namaJualan = result.data['tipe'];
+      _jualan.namaJualan = result.data['nama'];
+      _jualan.namaJualan = result.data['tipe'];
     });
   }
 
-  setDocument(String namaJualan) async {
+  _setDocument(String namaJualan) async {
     final uid = await Provider.of(context).auth.getCurrentUID();
     String docId;
     int tipe;
@@ -63,7 +63,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
         .setData({'nama': namaJualan, 'tipe': tipe});
   }
 
-  setDocumentFromJson(Map<String, dynamic> toJson) async {
+  _setDocumentFromJson(Map<String, dynamic> toJson) async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
     await Provider.of(context)
@@ -72,6 +72,30 @@ class _updateMenuPageState extends State<updateMenuPage> {
         .document(uid)
         .collection('menus')
         .add(toJson);
+  }
+
+  _updateDocumentFromJson(Map<String, dynamic> toJson, String uidDoc) async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context)
+        .db
+        .collection('dataJualan')
+        .document(uid)
+        .collection('menus')
+        .document(uidDoc)
+        .setData(toJson);
+  }
+
+  _deleteDocumentFromJson(String uidDoc) async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context)
+        .db
+        .collection('dataJualan')
+        .document(uid)
+        .collection('menus')
+        .document(uidDoc)
+        .delete();
   }
 
   @override
@@ -120,20 +144,20 @@ class _updateMenuPageState extends State<updateMenuPage> {
                           showDialog(
                               context: context,
                               builder: (context) {
-                                return inputDialog(
-                                    'Nama jualan anda', namaController);
+                                return _inputDialog(
+                                    'Nama jualan anda', _namaController);
                               });
                         }),
                   ],
                 ),
                 FutureBuilder(
-                    future: getDocument(),
+                    future: _getDocument(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done) {
                         return Align(
                           alignment: Alignment.centerLeft,
                           child: AutoSizeText(
-                            jualan.namaJualan,
+                            _jualan.namaJualan,
                             maxLines: 1,
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
@@ -160,11 +184,6 @@ class _updateMenuPageState extends State<updateMenuPage> {
                             fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       Spacer(),
-                      AutoSizeText(
-                        'Satuan',
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
                     ],
                   ),
                 ),
@@ -179,7 +198,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
                       try {
                         return showDialog(
                             context: context,
-                            builder: (context) => inputMenu());
+                            builder: (context) => _inputMenu());
                       } on Exception catch (e) {
                         print(e);
                       }
@@ -191,13 +210,14 @@ class _updateMenuPageState extends State<updateMenuPage> {
                   height: _height * 0.4,
                   width: _width,
                   child: StreamBuilder(
-                    stream: getMenuStreamSnapshots(context),
+                    stream: _getMenuStreamSnapshots(context),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData) return CircularProgressIndicator();
+                      if (!snapshot.hasData)
+                        return Center(child: CircularProgressIndicator());
                       return ListView.builder(
                           itemCount: snapshot.data.documents.length,
                           itemBuilder: (BuildContext context, int index) =>
-                              buildMenuCard(
+                              _buildMenuCard(
                                   context, snapshot.data.documents[index]));
                     },
                   ),
@@ -210,12 +230,16 @@ class _updateMenuPageState extends State<updateMenuPage> {
     );
   }
 
-  Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
+  Stream<QuerySnapshot> _getMenuStreamSnapshots(BuildContext context) async* {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    yield* Firestore.instance.collection('dataJualan').document(uid).collection('menus').snapshots();
+    yield* Firestore.instance
+        .collection('dataJualan')
+        .document(uid)
+        .collection('menus')
+        .snapshots();
   }
 
-  Widget buildMenuCard(BuildContext context, DocumentSnapshot document) {
+  Widget _buildMenuCard(BuildContext context, DocumentSnapshot document) {
     return new SingleChildScrollView(
       child: Card(
         child: InkWell(
@@ -227,30 +251,58 @@ class _updateMenuPageState extends State<updateMenuPage> {
                 Spacer(),
                 Text(document['hargaMakanan']),
                 Spacer(),
-                Text(document['satuan'].toString()),
-                Spacer(),
-                Text(document['satuanMakanan']),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  color: Colors.green[800],
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      child: AlertDialog(
+                        title: Text("Hapus " + document['namaMakanan'] + " dari menu?"),
+                        actions: [
+                          FlatButton(
+                            child: Text("Kembali"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          FlatButton(
+                            child: Text("Hapus"),
+                            onPressed: () {
+                              String docId = document.documentID;
+                              _deleteDocumentFromJson(docId);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => updateMenuPage()));
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
-          onTap: () {},
+          onTap: () {
+            showDialog(
+                context: context, builder: (context) => _editMenu(document));
+          },
         ),
       ),
     );
   }
 
-  Dialog inputMenu() {
+  Dialog _inputMenu() {
     TextEditingController namaMenuController = TextEditingController();
     TextEditingController hargaController = TextEditingController();
-    TextEditingController satuanController = TextEditingController();
-
-    bool showTextfield = false;
 
     return Dialog(
       child: Stack(
         children: <Widget>[
           Container(
-            height: 350,
+            height: 300,
             padding: const EdgeInsets.all(20.0),
             color: Colors.yellow[50],
             child: Column(
@@ -287,53 +339,6 @@ class _updateMenuPageState extends State<updateMenuPage> {
                 SizedBox(
                   height: 20,
                 ),
-                Row(
-                  children: [
-                    AutoSizeText(
-                      'Satuan',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    Spacer()
-                  ],
-                ),
-                Container(
-                  child: Row(children: <Widget>[
-                    Visibility(
-                      maintainSize: true,
-                      maintainAnimation: true,
-                      maintainState: true,
-                      visible: showTextfield,
-                      child: Container(
-                        width: 50,
-                        child: TextField(
-                          controller: satuanController,
-                        ),
-                      ),
-                    ),
-                    DropdownButton<String>(
-                        items: <String>['satuan', 'porsi'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(color: Colors.black),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value == 'satuan') {
-                            setState(() {
-                              showTextfield = true;
-                            });
-                          } else if (value == 'porsi') {
-                            setState(() {
-                              showTextfield = false;
-                            });
-                          }
-                        }),
-                  ]),
-                ),
                 SizedBox(height: 20),
                 Row(
                   children: <Widget>[
@@ -349,11 +354,9 @@ class _updateMenuPageState extends State<updateMenuPage> {
                         ),
                         onPressed: () async {
                           try {
-                            menu.namaMakanan = namaMenuController.text;
-                            menu.hargaMakanan = hargaController.text;
-                            menu.satuanMakanan = 'porsi';
-                            menu.satuan = 0;
-                            setDocumentFromJson(menu.toJson());
+                            _menu.namaMakanan = namaMenuController.text;
+                            _menu.hargaMakanan = hargaController.text;
+                            _setDocumentFromJson(_menu.toJson());
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -385,7 +388,105 @@ class _updateMenuPageState extends State<updateMenuPage> {
     );
   }
 
-  Dialog inputDialog(String inputTitle, TextEditingController inputController) {
+  Dialog _editMenu(DocumentSnapshot document) {
+    TextEditingController namaMenuController =
+        TextEditingController(text: document['namaMakanan']);
+    TextEditingController hargaController =
+        TextEditingController(text: document['hargaMakanan']);
+
+    return Dialog(
+      child: Stack(
+        children: <Widget>[
+          Container(
+            height: 300,
+            padding: const EdgeInsets.all(20.0),
+            color: Colors.yellow[50],
+            child: Column(
+              children: <Widget>[
+                Row(
+                  children: [
+                    AutoSizeText(
+                      'Nama Menu',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Spacer()
+                  ],
+                ),
+                TextField(
+                  controller: namaMenuController,
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  children: [
+                    AutoSizeText(
+                      'Harga',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Spacer()
+                  ],
+                ),
+                TextField(
+                  controller: hargaController,
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                SizedBox(height: 20),
+                Row(
+                  children: <Widget>[
+                    SizedBox(width: 40),
+                    RaisedButton(
+                        child: AutoSizeText(
+                          'Kirim',
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey[800]),
+                        ),
+                        onPressed: () async {
+                          try {
+                            String docId = document.documentID;
+                            _menu.namaMakanan = namaMenuController.text;
+                            _menu.hargaMakanan = hargaController.text;
+                            _updateDocumentFromJson(_menu.toJson(), docId);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => updateMenuPage()));
+                          } on Exception catch (e) {
+                            print(e);
+                          }
+                        }),
+                    SizedBox(width: 20),
+                    RaisedButton(
+                        child: AutoSizeText(
+                          'Batal',
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey[800]),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                  ],
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Dialog _inputDialog(
+      String inputTitle, TextEditingController inputController) {
     return Dialog(
       child: Stack(
         children: <Widget>[
@@ -417,8 +518,8 @@ class _updateMenuPageState extends State<updateMenuPage> {
                       ),
                       onPressed: () async {
                         try {
-                          jualan.namaJualan = inputController.text;
-                          setDocument(jualan.namaJualan);
+                          _jualan.namaJualan = inputController.text;
+                          _setDocument(_jualan.namaJualan);
                           Navigator.push(
                               context,
                               MaterialPageRoute(

@@ -7,6 +7,7 @@ import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_customer.dart';
 import 'package:hehe/screens/home_seller.dart';
 import 'package:hehe/screens/login.dart';
+import 'package:hehe/screens/regSeller.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -27,16 +28,6 @@ class AuthService {
     return await _auth.currentUser();
   }
 
-  // sign in without account
-  Future signInAnon() async {
-    try {
-      return await _auth.signInAnonymously();
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
   // sign up phone number
   Future<String> signUpUserWithPhone(
       String phone, BuildContext context, String userName, int tipeUser) {
@@ -48,88 +39,12 @@ class AuthService {
             if (tipeUser == 0) {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => CustomerHomePage()));
+              Navigator.pop(context);
             } else {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => SellerHomePage()));
+              Navigator.pop(context);
             }
-          }).catchError((e) {
-            return "error";
-          });
-        },
-        verificationFailed: (AuthException exception) {
-          return 'error';
-        },
-        codeSent: (String verificationId, [int forceResendToken]) {
-          final _codeController = TextEditingController();
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text("Kode Verifikasi Anda"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly
-                    ],
-                    controller: _codeController,
-                  )
-                ],
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  color: Colors.lightGreen,
-                  child: Text("Submit"),
-                  textColor: Colors.white,
-                  onPressed: () {
-                    var _credential = PhoneAuthProvider.getCredential(
-                        verificationId: verificationId,
-                        smsCode: _codeController.text.trim());
-                    _auth.signInWithCredential(_credential).then(
-                      (AuthResult result) async {
-                        String uid = await result.user.uid;
-                        createUserToDatabase(uid, userName, phone, tipeUser);
-                        if (tipeUser == 0) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => CustomerHomePage()));
-                        } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SellerHomePage()));
-                        }
-                      },
-                    ).catchError(
-                      (e) {
-                        return "error";
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          verificationId = verificationId;
-          print(verificationId);
-          print("Timeout");
-        });
-  }
-
-  // register and sign in with phone number
-  Future signInUserWithPhone(String phone, BuildContext context) {
-    _auth.verifyPhoneNumber(
-        phoneNumber: phone,
-        timeout: Duration(seconds: 0),
-        verificationCompleted: (AuthCredential authCredential) {
-          _auth.signInWithCredential(authCredential).then((AuthResult result) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CustomerHomePage()));
           }).catchError((e) {
             return "error";
           });
@@ -165,8 +80,6 @@ class AuthService {
                   ),
                   onPressed: () {
                     Navigator.pop(context);
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginPage()));
                   },
                 ),
                 SizedBox(
@@ -182,7 +95,104 @@ class AuthService {
                         smsCode: _codeController.text.trim());
                     _auth.signInWithCredential(_credential).then(
                       (AuthResult result) async {
+                        String uid = await result.user.uid;
+                        createUserToDatabase(uid, userName, phone, tipeUser);
+                        if (tipeUser == 0) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CustomerHomePage()));
+                          Navigator.pop(context);
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SellerHomePage()));
+                          Navigator.pop(context);
+                        }
+                      },
+                    ).catchError(
+                      (e) {
+                        return "error";
+                      },
+                    );
+                  },
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+              ],
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          verificationId = verificationId;
+          print(verificationId);
+          print("Timeout");
+        });
+  }
+
+  // register and sign in with phone number
+  Future signInUserWithPhone(String phone, BuildContext context) {
+    _auth.verifyPhoneNumber(
+        phoneNumber: phone,
+        timeout: Duration(seconds: 0),
+        verificationCompleted: (AuthCredential authCredential) {
+          _auth.signInWithCredential(authCredential).then((AuthResult result) {
+            navigateUser(phone, context);
+            Navigator.pop(context);
+          }).catchError((e) {
+            return "error";
+          });
+        },
+        verificationFailed: (AuthException exception) {
+          return 'error';
+        },
+        codeSent: (String verificationId, [int forceResendToken]) {
+          final _codeController = TextEditingController();
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: Text("Kode Verifikasi Anda"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.digitsOnly
+                    ],
+                    controller: _codeController,
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  color: Colors.red[100],
+                  child: Text(
+                    "Kembali",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    },
+                ),
+                SizedBox(
+                  width: 30,
+                ),
+                FlatButton(
+                  color: Colors.lightGreen,
+                  child: Text("Submit"),
+                  textColor: Colors.white,
+                  onPressed: () {
+                    var _credential = PhoneAuthProvider.getCredential(
+                        verificationId: verificationId,
+                        smsCode: _codeController.text.trim());
+                    _auth.signInWithCredential(_credential).then(
+                      (AuthResult result) async {
                         navigateUser(phone, context);
+                        Navigator.pop(context);
                       },
                     ).catchError(
                       (e) {
@@ -207,27 +217,20 @@ class AuthService {
 
   // sign out
   Future signOut() async {
-    try {
-      return await _auth.signOut();
-    } catch (e) {
-      print(e.toString());
-    }
+    await _auth.signOut();
   }
 
   void navigateUser(String phoneNumber, BuildContext context) async {
-    int tipeUser;
-
     await db
         .collection('userData')
         .where('phoneNumber', isEqualTo: phoneNumber)
         .getDocuments()
         .then((ref) {
       if (ref.documents.length > 0) {
-        tipeUser = ref.documents[0].data['tipeUser'];
-        if (tipeUser == 0) {
+        if (ref.documents[0].data['tipeUser'] == 0) {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => CustomerHomePage()));
-        } else {
+        } else if (ref.documents[0].data['tipeUser'] == 1 && ref.documents[0].data['tipeUser'] == 2){
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => SellerHomePage()));
         }

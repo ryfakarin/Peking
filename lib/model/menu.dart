@@ -1,20 +1,14 @@
-import 'package:flutter/cupertino.dart';
-
 class menuModel {
 
   String namaMakanan;
   String hargaMakanan;
-  String satuanMakanan;
-  int satuan;
 
   menuModel(
-      @required this.namaMakanan, this.hargaMakanan, this.satuanMakanan, this.satuan);
+      this.namaMakanan, this.hargaMakanan);
 
   Map<String, dynamic> toJson() => {
     'namaMakanan': namaMakanan,
     'hargaMakanan': hargaMakanan,
-    'satuanMakanan': satuanMakanan,
-    'satuan' : satuan
   };
 
 }

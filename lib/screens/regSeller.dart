@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/services/auth.dart';
+import 'package:hehe/widgets/customs.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 
@@ -11,15 +12,15 @@ class regSellerPage extends StatefulWidget {
 }
 
 class _regSellerPageState extends State<regSellerPage> {
-  int radioValue = 0;
-  String phoneNumberCust;
+  int _radioValue = 0;
+  String _phoneNumberCust;
 
-  TextEditingController namaController = TextEditingController();
+  TextEditingController _namaController = TextEditingController();
 
-  void PhoneNumberChangeCust(
+  _PhoneNumberChangeCust(
       String number, String internationalizedPhoneNumber, String isCode) {
-    phoneNumberCust = internationalizedPhoneNumber;
-    print(phoneNumberCust);
+    _phoneNumberCust = internationalizedPhoneNumber;
+    print(_phoneNumberCust);
   }
 
   @override
@@ -60,8 +61,22 @@ class _regSellerPageState extends State<regSellerPage> {
                 children: <Widget>[
                   new Radio(
                     value: 1,
-                    groupValue: radioValue,
-                    onChanged: (newValue) => setState(() => radioValue = newValue), activeColor: Colors.teal[800],
+                    groupValue: _radioValue,
+                    onChanged: (newValue) {
+                      setState(() => _radioValue = newValue);
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => CustomDialog(
+                          title: "Anda memilih tipe berdagang keliling",
+                          description:
+                          "Anda berpindah-pindah saat berdagang. Pembeli dapat memanggil anda berdasarkan lokasi anda berhjualan. Pilihan ini tidak dapat diubah.",
+                          primaryButtonText: "OK",
+                          primaryButtonRoute: "",
+                        ),
+                      );
+                    },
+                    activeColor: Colors.teal[800],
+
                   ),
                   new Text(
                     'Keliling',
@@ -69,8 +84,21 @@ class _regSellerPageState extends State<regSellerPage> {
                   ),
                   new Radio(
                     value: 2,
-                    groupValue: radioValue,
-                    onChanged: (newValue) => setState(() => radioValue = newValue), activeColor: Colors.teal[800],
+                    groupValue: _radioValue,
+                    onChanged: (newValue) {
+                      setState(() => _radioValue = newValue);
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => CustomDialog(
+                          title: "Anda memilih tipe berdagang menetap",
+                          description:
+                          "Anda tidak berpindah-pindah saat berdagang. Pembeli tidak dapat memanggil anda, hanya dapat mengetahui lokasi anda berhjualan. Pilihan ini tidak dapat diubah.",
+                          primaryButtonText: "OK",
+                          primaryButtonRoute: "",
+                        ),
+                      );
+                    },
+                    activeColor: Colors.teal[800],
                   ),
                   new Text(
                     'Menetap',
@@ -95,7 +123,7 @@ class _regSellerPageState extends State<regSellerPage> {
                   bottom: BorderSide(color: Colors.teal[900]),
                 )),
                 child: TextField(
-                  controller: namaController,
+                  controller: _namaController,
                   decoration: InputDecoration.collapsed(hintText: 'Nama anda'),
                 ),
               ),
@@ -114,10 +142,10 @@ class _regSellerPageState extends State<regSellerPage> {
                   bottom: BorderSide(color: Colors.teal[900]),
                 )),
                 child: InternationalPhoneInput(
-                    decoration: InputDecoration.collapsed(
-                        hintText: '(813) 111-6167'),
-                    onPhoneNumberChange: PhoneNumberChangeCust,
-                    initialPhoneNumber: phoneNumberCust,
+                    decoration:
+                        InputDecoration.collapsed(hintText: '(813) 111-6167'),
+                    onPhoneNumberChange: _PhoneNumberChangeCust,
+                    initialPhoneNumber: _phoneNumberCust,
                     initialSelection: 'ID',
                     enabledCountries: ['+62'],
                     showCountryFlags: false),
@@ -135,15 +163,34 @@ class _regSellerPageState extends State<regSellerPage> {
                 shape: CircleBorder(),
                 onPressed: () async {
                   try {
-                    if (radioValue != 0 && namaController.text != "" && phoneNumberCust != "") {
-                      print(radioValue);
-                      print(namaController.text);
-                      print(phoneNumberCust);
-
-                      final auth = Provider.of(context).auth;
-                      String userName = namaController.text;
-                      String uid = await auth.signUpUserWithPhone(
-                          phoneNumberCust, context, userName, radioValue);
+                    if (_radioValue != 0 &&
+                        _namaController.text != "" &&
+                        _phoneNumberCust != "") {
+                      await Provider.of(context)
+                          .db
+                          .collection('userData')
+                          .where('phoneNumber', isEqualTo: _phoneNumberCust)
+                          .getDocuments()
+                          .then(
+                        (ref) async {
+                          if (ref.documents.length > 0) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => CustomDialog(
+                                  title: "Nomor anda sudah terdaftar",
+                                  description: " ",
+                                  primaryButtonText: "OK",
+                                  primaryButtonRoute: "/regSeller"),
+                            );
+                          } else {
+                            String userName = _namaController.text;
+                            String uid = await Provider.of(context)
+                                .auth
+                                .signUpUserWithPhone(_phoneNumberCust, context,
+                                    userName, _radioValue);
+                          }
+                        },
+                      );
                     }
                   } on Exception catch (e) {
                     print(e);

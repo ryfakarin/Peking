@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/profile_seller.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,45 +13,80 @@ class SellerHomePage extends StatefulWidget {
 }
 
 class _SellerHomePageState extends State<SellerHomePage> {
-  String currentStatus = 'checkIn';
-  Position currentLocation;
+  Color _iconInColor = Colors.green[400];
+  Color _iconOutColor = Colors.grey[600];
+  Color _iconTravelColor = Colors.green[400];
+  Color _iconNotColor = Colors.green[400];
+  Color _iconClickColor = Colors.grey[600];
+
+  String _currentStatus = 'checkOut';
+  Position _currentLocation;
 
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
 
-  void mapCreated(controller) {
+  void _mapCreated(controller) {
     setState(() {
       _mapController = controller;
     });
   }
 
-  Future<Position> locateUser() async {
+  Future<Position> _locateUser() async {
     return Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
   }
 
-  getLocation() async {
-    currentLocation = await locateUser();
+  _getLocation() async {
+    _currentLocation = await _locateUser();
     setState(() {
       _currentPosition =
-          LatLng(currentLocation.latitude, currentLocation.longitude);
+          LatLng(_currentLocation.latitude, _currentLocation.longitude);
     });
 
     _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(currentLocation.latitude, currentLocation.longitude),
-        zoom: 14.0)));
+        target: LatLng(_currentLocation.latitude, _currentLocation.longitude),
+        zoom: 16.0)));
 
-    setDocument();
+    _setDocument();
+    _setMarker();
   }
 
-  setDocument() async {
+  _setDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
     await Provider.of(context).db.collection('locData').document(uid).setData({
       'latitude': _currentPosition.latitude,
       'longitude': _currentPosition.longitude
     });
+  }
+
+  _setMarker() async {
+    List<String> user = List<String>();
+    List<String> userWithLoc = List<String>();
+
+    QuerySnapshot snap = await Firestore.instance
+        .collection('userData')
+        .where('tipeUser', isEqualTo: 0)
+        .getDocuments();
+
+    for (int i = 0; i < snap.documents.length; i++) {
+      user.add(snap.documents[i].documentID);
+    }
+
+    QuerySnapshot snaps =
+        await Firestore.instance.collection('locData').getDocuments();
+
+    for (int i = 0; i < snaps.documents.length; i++) {
+      if (user.contains(snaps.documents[i].documentID)) {
+        userWithLoc.add(snaps.documents[i].documentID);
+        _mapMarker.add(Marker(
+          markerId: MarkerId(snaps.documents[i].documentID),
+          position: LatLng(snaps.documents[i].data['latitude'],
+              snaps.documents[i].data['longitude']),
+        ));
+      }
+    }
   }
 
   @override
@@ -126,28 +162,37 @@ class _SellerHomePageState extends State<SellerHomePage> {
                       IconButton(
                           icon: Icon(Icons.house),
                           iconSize: 40,
-                          color: Colors.green[400],
+                          color: _iconOutColor,
                           onPressed: () {
                             setState(() {
-                              currentStatus = 'checkIn';
-                            });
-                          }),
-                      IconButton(
-                          icon: Icon(Icons.car_repair),
-                          iconSize: 40,
-                          color: Colors.green[400],
-                          onPressed: () {
-                            setState(() {
-                              currentStatus = 'travel';
+                              _iconOutColor = _iconClickColor;
+                              _iconInColor = _iconNotColor;
+                              _iconTravelColor = _iconNotColor;
+                              _currentStatus = 'checkOut';
                             });
                           }),
                       IconButton(
                           icon: Icon(Icons.store),
                           iconSize: 40,
-                          color: Colors.green[400],
+                          color: _iconInColor,
                           onPressed: () {
                             setState(() {
-                              currentStatus = 'checkOut';
+                              _iconOutColor = _iconNotColor;
+                              _iconInColor = _iconClickColor;
+                              _iconTravelColor = _iconNotColor;
+                              _currentStatus = 'checkIn';
+                            });
+                          }),
+                      IconButton(
+                          icon: Icon(Icons.add_road),
+                          iconSize: 40,
+                          color: _iconTravelColor,
+                          onPressed: () {
+                            setState(() {
+                              _iconOutColor = _iconNotColor;
+                              _iconInColor = _iconNotColor;
+                              _iconTravelColor = _iconClickColor;
+                              _currentStatus = 'travel';
                             });
                           })
                     ],
@@ -160,48 +205,80 @@ class _SellerHomePageState extends State<SellerHomePage> {
   }
 
   Widget dynamicWidget() {
-    if (currentStatus == 'checkIn') {
-      return AutoSizeText(
-        'Check In',
-        style: TextStyle(color: Colors.blue, fontSize: 20),
-      );
-    } else if (currentStatus == 'travel') {
-      return Column(
-        children: <Widget>[
-          RaisedButton(
-            textColor: Colors.white,
-            padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-            color: Colors.brown[300],
-            shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0)),
-            onPressed: () {
-              getLocation();
-            },
-            child: Container(
-              child: AutoSizeText('Perbarui Lokasi',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+    if (_currentStatus == 'checkOut') {
+      return Container(
+        height: 400,
+        child: Column(
+          children: <Widget>[
+            Center(
+              child: AutoSizeText(
+                'Anda sedang tidak berjualan..',
+                maxLines: 1,
+                style: TextStyle(
+                    color: Colors.brown[600],
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
-          SizedBox(height: 20),
-          Container(
-            margin: EdgeInsets.only(left: 20, right: 20),
-            height: 350,
-            color: Colors.lightGreen,
-            child: GoogleMap(
-              initialCameraPosition:
-                  CameraPosition(target: _currentPosition, zoom: 14.0),
-              mapType: MapType.normal,
-              markers: _mapMarker,
-              myLocationEnabled: true,
-              onMapCreated: mapCreated,
-            ),
-          ),
-        ],
+            Spacer(),
+          ],
+        ),
       );
-    } else if (currentStatus == 'checkOut') {
-      return AutoSizeText(
-        'Check Out',
-        style: TextStyle(color: Colors.blue, fontSize: 20),
+    } else if (_currentStatus == 'checkIn') {
+      return Padding(
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+        child: Column(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AutoSizeText(
+                "Lokasi anda sekarang",
+                maxLines: 1,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.green[800]),
+              ),
+            ),
+            SizedBox(height: 20),
+            FutureBuilder(
+                future: _getLocation(),
+                builder: (context, snapshot) {
+                  return Container(
+                    height: 400,
+                    color: Colors.lightGreen,
+                    child: GoogleMap(
+                      initialCameraPosition:
+                          CameraPosition(target: _currentPosition, zoom: 16.0),
+                      mapType: MapType.normal,
+                      markers: _mapMarker,
+                      myLocationEnabled: true,
+                      onMapCreated: _mapCreated,
+                    ),
+                  );
+                }),
+          ],
+        ),
+      );
+    } else if (_currentStatus == 'travel') {
+      return Container(
+        height: 400,
+        child: Column(
+          children: <Widget>[
+            Center(
+              child: AutoSizeText(
+                'Anda sedang menuju suatu lokasi..',
+                maxLines: 1,
+                style: TextStyle(
+                    color: Colors.brown[600],
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+            Spacer(),
+          ],
+        ),
       );
     }
   }

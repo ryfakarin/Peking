@@ -12,9 +12,9 @@ class customerProfilePage extends StatefulWidget {
 }
 
 class _customerProfilePageState extends State<customerProfilePage> {
-  UserModel user = UserModel("", "", "", null);
+  UserModel _user = UserModel("", "", "", null);
 
-  getDocument() async {
+  _getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
     String docId;
 
@@ -24,8 +24,8 @@ class _customerProfilePageState extends State<customerProfilePage> {
         .document(uid)
         .get()
         .then((result) {
-      user.phoneNumber = result.data['phoneNumber'];
-      user.name = result.data['nama'];
+      _user.phoneNumber = result.data['phoneNumber'];
+      _user.name = result.data['nama'];
     });
   }
 
@@ -87,10 +87,10 @@ class _customerProfilePageState extends State<customerProfilePage> {
               ),
               SizedBox(height: _height * 0.04),
               FutureBuilder(
-                future: getDocument(),
+                future: _getDocument(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return AutoSizeText(user.name,
+                    return AutoSizeText(_user.name,
                         style: TextStyle(
                             color: Colors.black,
                             fontSize: 30,
@@ -102,10 +102,10 @@ class _customerProfilePageState extends State<customerProfilePage> {
               ),
               SizedBox(height: _height * 0.01),
               FutureBuilder(
-                future: getDocument(),
+                future: _getDocument(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return AutoSizeText(user.phoneNumber,
+                    return AutoSizeText(_user.phoneNumber,
                         style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 18,

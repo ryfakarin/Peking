@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/home_customer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hehe/screens/profile_customer.dart';
 import 'package:hehe/widgets/provider.dart';
 
 class StatusAndHistoryCust extends StatefulWidget {
@@ -12,13 +13,13 @@ class StatusAndHistoryCust extends StatefulWidget {
 }
 
 class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
-  String cardTitle = '';
+  List<String> _cardTitle = List();
 
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
 
-  void mapCreated(controller) {
+  _mapCreated(controller) {
     setState(() {
       _mapController = controller;
     });
@@ -79,7 +80,12 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
                 size: 30.0,
                 color: Colors.green,
               ),
-              onPressed: null),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => customerProfilePage()));
+              }),
         ],
       ),
       body: SingleChildScrollView(
@@ -101,26 +107,29 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
                     )
                   ],
                 ),
-                Container(
-                  height: _height * 0.75,
-                  width: _width,
-                  // color: Colors.purple,
-                  child: StreamBuilder(
-                      stream: getPanggilanStreamSnapshots(context),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData)
+                SingleChildScrollView(
+                  child: Container(
+                    height: _height * 0.75,
+                    width: _width,
+                    // color: Colors.purple,
+                    child: StreamBuilder(
+                      stream: _getCurrPanggilanStreamSnapshots(context),
+                      builder: (context, sn) {
+                        if (!sn.hasData)
                           return Row(children: <Widget>[
                             Spacer(),
                             AutoSizeText('Tidak ada data yang tersedia'),
                             Spacer(),
                           ]);
                         return ListView.builder(
-                            itemCount: snapshot.data.documents.length,
+                            itemCount: sn.data.documents.length,
                             itemBuilder: (BuildContext context, int index) =>
-                                buildStatusCards(
-                                    context, snapshot.data.documents[index]));
-                      }),
-                )
+                                _buildStatusCards(
+                                    context, sn.data.documents[index]));
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -129,21 +138,17 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
     );
   }
 
-  Stream<QuerySnapshot> getPanggilanStreamSnapshots(
+  Stream<QuerySnapshot> _getCurrPanggilanStreamSnapshots(
       BuildContext context) async* {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    yield* Firestore.instance.collection('panggilanData').where('custId', isEqualTo:uid).snapshots();
+    yield* Firestore.instance
+        .collection('panggilanData')
+        .where('custId', isEqualTo: uid)
+        .orderBy('statusPanggilan')
+        .snapshots();
   }
 
-  getUserSnapshots(String userId) async {
-    await Firestore.instance
-        .collection('userData')
-        .document(userId)
-        .get()
-        .then((value) => cardTitle = value.data['nama']);
-  }
-
-  Widget buildStatusCards(BuildContext context, DocumentSnapshot document) {
+  Widget _buildStatusCards(BuildContext context, DocumentSnapshot document) {
     return SingleChildScrollView(
       child: Card(
         shape: RoundedRectangleBorder(
@@ -151,31 +156,39 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         margin: EdgeInsets.all(10.0),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: FutureBuilder(
-            future: getUserSnapshots(document['sellerId']),
-            builder: (context, snapshot) {
-              return ExpansionTile(
-                title: AutoSizeText(
-                  cardTitle,
-                  maxLines: 1,
-                  style: TextStyle(fontSize: 16),
-                ),
-                children: <Widget>[
-                  buildCard1(document),
-                  buildTolakPanggilan(document),
-                  buildTerimaPanggilan(document),
-                  buildPenjualTravel(document),
-                  buildPanggilanSelesai(document),
-                ],
-              );
-            },
+          child: ExpansionTile(
+            title: FutureBuilder(
+                future: Firestore.instance
+                    .collection('userData')
+                    .document(document['sellerId'])
+                    .get(),
+                builder: (context, sn) {
+                  if (!sn.hasData)
+                    return Row(children: <Widget>[
+                      Spacer(),
+                      AutoSizeText('Tidak ada data yang tersedia'),
+                      Spacer(),
+                    ]);
+                  return AutoSizeText(
+                    sn.data['nama'],
+                    maxLines: 1,
+                    style: TextStyle(fontSize: 16),
+                  );
+                }),
+            children: <Widget>[
+              _buildCard1(document),
+              _buildTolakPanggilan(document),
+              _buildTerimaPanggilan(document),
+              _buildPenjualTravel(document),
+              _buildPanggilanSelesai(document),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget buildPanggilanSelesai(DocumentSnapshot document) {
+  Widget _buildPanggilanSelesai(DocumentSnapshot document) {
     return document['statusPanggilan'] == 4
         ? Card(
             child: Container(
@@ -199,7 +212,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget buildPenjualTravel(DocumentSnapshot document) {
+  Widget _buildPenjualTravel(DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 &&
             document['statusPanggilan'] != 6 &&
             document['statusPanggilan'] != 2
@@ -220,7 +233,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
                   mapType: MapType.normal,
                   markers: _mapMarker,
                   myLocationEnabled: true,
-                  onMapCreated: mapCreated,
+                  onMapCreated: _mapCreated,
                 ),
               ),
             ],
@@ -228,7 +241,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget buildTerimaPanggilan(DocumentSnapshot document) {
+  Widget _buildTerimaPanggilan(DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 && document['statusPanggilan'] != 6
         ? Card(
             child: Container(
@@ -248,7 +261,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget buildTolakPanggilan(DocumentSnapshot document) {
+  Widget _buildTolakPanggilan(DocumentSnapshot document) {
     return document['statusPanggilan'] != 6
         ? Padding(
             padding: EdgeInsets.zero,
@@ -270,7 +283,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
           );
   }
 
-  Card buildCard1(DocumentSnapshot document) {
+  Card _buildCard1(DocumentSnapshot document) {
     return Card(
       child: Container(
         padding: EdgeInsets.all(15),
