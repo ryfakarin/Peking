@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:hehe/screens/profile_customer.dart';
 import 'package:hehe/screens/status_history_customer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hehe/model/panggilan.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hehe/screens/viewSellerPage.dart';
 import 'package:hehe/widgets/provider.dart';
 
@@ -19,7 +22,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   final Set<Marker> _mapMarker = {};
   LatLng _currentPosition = LatLng(0, 0);
+  Position _currentLocation;
   GoogleMapController _mapController;
+
+  List<String> user = List<String>();
+  List<String> userVal = List<String>();
+  List<GeoPoint> userWithLoc = List<GeoPoint>();
 
   List<String> resultList = List();
   List<String> resultToList = List();
@@ -46,6 +54,19 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     resultsLoaded = getSearchResult();
+  }
+
+  Future<Position> _locateUser() async {
+    return Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+  }
+
+  _getLocation() async {
+    _currentLocation = await _locateUser();
+    _currentPosition =
+        LatLng(_currentLocation.latitude, _currentLocation.longitude);
+
+    _setDocument();
   }
 
   getSearchResult() async {
@@ -95,9 +116,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   _setDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
-    await Provider.of(context).db.collection('locData').document(uid).setData({
-      'latitude': _currentPosition.latitude,
-      'longitude': _currentPosition.longitude
+    await Firestore.instance.collection('locData').document(uid).setData({
+      'location':
+          GeoPoint(_currentPosition.latitude, _currentPosition.longitude)
     });
   }
 
@@ -114,8 +135,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   _setMarker() async {
-    List<String> user = List<String>();
-    List<String> userWithLoc = List<String>();
+    _getLocation();
 
     QuerySnapshot snap = await Firestore.instance
         .collection('userData')
@@ -131,11 +151,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
     for (int i = 0; i < snaps.documents.length; i++) {
       if (user.contains(snaps.documents[i].documentID)) {
-        userWithLoc.add(snaps.documents[i].documentID);
+        userWithLoc.add(snaps.documents[i].data['location']);
         _mapMarker.add(Marker(
           markerId: MarkerId(snaps.documents[i].documentID),
-          position: LatLng(snaps.documents[i].data['latitude'],
-              snaps.documents[i].data['longitude']),
+          position: LatLng(userWithLoc[i].latitude, userWithLoc[i].longitude),
         ));
       }
     }
@@ -149,11 +168,11 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         .get()
         .then((result) {
       setState(() {
+        GeoPoint currPos = result.data['location'];
         _currentPosition =
-            LatLng(result.data['latitude'], result.data['longitude']);
+            LatLng(currPos.latitude, currPos.longitude);
       });
 
-      print(_currentPosition);
       navigateMap(_currentPosition);
     });
   }
@@ -317,10 +336,28 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   Stream<QuerySnapshot> _getSellerStreamSnapshots() async* {
+    var offset = 0.0000089982311916 * 300;
+    var latMax = _currentPosition.latitude + offset;
+    var latMin = _currentPosition.latitude - offset;
+
+    var lngOffset = offset * cos(_currentPosition.latitude * pi / 180.0);
+    var lngMax = _currentPosition.longitude + lngOffset;
+    var lngMin = _currentPosition.longitude - lngOffset;
+
+    var greaterGeopoint = GeoPoint(latMax, lngMax);
+    var lesserGeopoint = GeoPoint(latMin, lngMin);
+
+    QuerySnapshot query = await Firestore.instance
+        .collection('locData')
+        .where('location', isLessThan: greaterGeopoint)
+        .where('location', isGreaterThan: lesserGeopoint)
+        .getDocuments();
+
     yield* Firestore.instance.collection('dataJualan').snapshots();
   }
 
   Widget _buildSellerCard(BuildContext context, DocumentSnapshot document) {
+    //if(userVal.contains(document.documentID))
     return new SingleChildScrollView(
       child: InkWell(
         child: Card(
@@ -347,15 +384,51 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                                   fontSize: 14, color: Colors.green[800]),
                             ),
                             onPressed: () {
-                              _panggilan.sellerId = document.documentID;
-                              _setData();
-                              _setDocument();
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          StatusAndHistoryCust()));
-                            })
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text(
+                                      "Panggil " + document['nama'] + " ?"),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      color: Colors.red[100],
+                                      child: Text(
+                                        "Kembali",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    FlatButton(
+                                      color: Colors.green[100],
+                                      child: Text(
+                                        "Log Out",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                      onPressed: () async {
+                                        _panggilan.sellerId =
+                                            document.documentID;
+                                        _setData();
+                                        _setDocument();
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    StatusAndHistoryCust()));
+                                      },
+                                    ),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          )
                         : FlatButton(onPressed: null)
                   ],
                 ),

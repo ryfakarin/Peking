@@ -55,29 +55,12 @@ class _UpdateProfileState extends State<UpdateProfile> {
           width: _width,
           child: Column(
             children: <Widget>[
-              Container(
-                height: _height * 0.2,
-                width: _width * 0.6,
-                margin: EdgeInsets.fromLTRB(105, 0, 105, 0),
-                padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                        fit: BoxFit.fitWidth,
-                        image: AssetImage('assets/images/cony.png'))),
-                child: Stack(children: <Widget>[
-                  new Positioned(
-                    right: 0.0,
-                    left: 0.0,
-                    bottom: 0.0,
-                    child: new Icon(
-                      Icons.camera_alt,
-                      size: 36.0,
+              SizedBox(height: _height * 0.15),
+              AutoSizeText('Ubah Profil',
+                  style: TextStyle(
                       color: Colors.black,
-                    ),
-                  ),
-                ]),
-              ),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold)),
               SizedBox(height: _height * 0.02),
               Container(
                 padding: EdgeInsets.only(right: _width * 0.7),

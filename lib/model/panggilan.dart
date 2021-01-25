@@ -18,11 +18,3 @@ class Panggilan {
     'statusPanggilan' : statusPanggilan,
   };
 }
-
-class Timestamp {
-
-  DateTime timestamp;
-
-  Timestamp(this.timestamp);
-
-}

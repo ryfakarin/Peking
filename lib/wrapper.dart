@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:hehe/screens/home_customer.dart';
 import 'package:hehe/screens/home_seller.dart';
 import 'package:hehe/screens/login.dart';

@@ -1,12 +1,7 @@
-class Places{
-  String name;
-
-  Places(this.name);
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Coordinates{
-  double latCoor;
-  double longCoor;
+  GeoPoint location;
 
-  Coordinates(this.latCoor, this.longCoor);
+  Coordinates(this.location);
 }

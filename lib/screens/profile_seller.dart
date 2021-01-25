@@ -38,53 +38,74 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
     return Scaffold(
       backgroundColor: Colors.lime[50],
       appBar: new AppBar(
-          leading: null,
-          toolbarHeight: _height * 0.07,
-          backgroundColor: Colors.transparent,
-          elevation: 0.0,
-          actions: <Widget>[
-            IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  size: 28.0,
-                  color: Colors.green,
+        leading: null,
+        toolbarHeight: _height * 0.07,
+        backgroundColor: Colors.transparent,
+        elevation: 0.0,
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                size: 28.0,
+                color: Colors.green,
+              ),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SellerHomePage()));
+              }),
+          Spacer(),
+          FlatButton(
+            child: AutoSizeText("Log Out",
+                style: TextStyle(color: Colors.green, fontSize: 20.0)),
+            onPressed: () async {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text("Log out dari akun anda?"),
+                  actions: <Widget>[
+                    FlatButton(
+                      color: Colors.red[100],
+                      child: Text(
+                        "Kembali",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    FlatButton(
+                      color: Colors.green[100],
+                      child: Text(
+                        "Log Out",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      onPressed: () async {
+                        await Provider.of(context).auth.signOut();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()));
+                      },
+                    ),
+                  ],
                 ),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SellerHomePage()));
-                }),
-            Spacer(),
-            FlatButton(
-                child: AutoSizeText("Log Out",
-                    style: TextStyle(color: Colors.green, fontSize: 20.0)),
-                onPressed: () async {
-                  await Provider.of(context).auth.signOut();
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
-                }),
-          ]),
+              );
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Container(
           width: _width,
-          // color: Colors.pink[50],
+          //color: Colors.pink[50],
           child: Padding(
             padding: EdgeInsets.all(0),
             child: Column(
               children: <Widget>[
-                Container(
-                  height: _height * 0.2,
-                  width: _width * 0.6,
-                  margin: EdgeInsets.fromLTRB(105, 0, 105, 0),
-                  padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          fit: BoxFit.fitWidth,
-                          image: AssetImage('assets/images/cony.png'))),
-                ),
-                SizedBox(height: _height * 0.02),
+                SizedBox(height: _height * 0.18),
                 FutureBuilder(
                   future: _getDocument(),
                   builder: (context, snapshot) {

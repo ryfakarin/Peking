@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:hehe/model/panggilan.dart';
 import 'package:hehe/screens/home_seller.dart';
 import 'package:hehe/screens/profile_seller.dart';
@@ -15,77 +14,17 @@ class statusAndHistorySeller extends StatefulWidget {
 
 class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
   String _cardTitle = '';
-  String currDocPanggilan;
 
-  Position _currentLocation;
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
 
   Panggilan _panggilan = Panggilan("", "", null);
-  Panggilan _currPanggilan = Panggilan("", "", null);
 
   _mapCreated(controller) {
     setState(() {
       _mapController = controller;
     });
-  }
-
-  Future<Position> _locateUser() async {
-    return Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-  }
-
-  _getLocation() async {
-    _currentLocation = await _locateUser();
-    setState(() {
-      _currentPosition =
-          LatLng(_currentLocation.latitude, _currentLocation.longitude);
-    });
-
-    _mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(_currentLocation.latitude, _currentLocation.longitude),
-        zoom: 16.0)));
-
-    _setDocument();
-    _setMarker();
-  }
-
-  _setDocument() async {
-    final uid = await Provider.of(context).auth.getCurrentUID();
-
-    await Provider.of(context).db.collection('locData').document(uid).setData({
-      'latitude': _currentPosition.latitude,
-      'longitude': _currentPosition.longitude
-    });
-  }
-
-  _setMarker() async {
-    List<String> user = List<String>();
-    List<String> userWithLoc = List<String>();
-
-    QuerySnapshot snap = await Firestore.instance
-        .collection('userData')
-        .where('tipeUser', isEqualTo: 0)
-        .getDocuments();
-
-    for (int i = 0; i < snap.documents.length; i++) {
-      user.add(snap.documents[i].documentID);
-    }
-
-    QuerySnapshot snaps =
-        await Firestore.instance.collection('locData').getDocuments();
-
-    for (int i = 0; i < snaps.documents.length; i++) {
-      if (user.contains(snaps.documents[i].documentID)) {
-        userWithLoc.add(snaps.documents[i].documentID);
-        _mapMarker.add(Marker(
-          markerId: MarkerId(snaps.documents[i].documentID),
-          position: LatLng(snaps.documents[i].data['latitude'],
-              snaps.documents[i].data['longitude']),
-        ));
-      }
-    }
   }
 
   @override
@@ -173,7 +112,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                 ),
                 SingleChildScrollView(
                   child: Container(
-                    height: _height * 0.65,
+                    height: _height * 0.7,
                     width: _width,
                     child: StreamBuilder(
                       stream: _getPanggilanStreamSnapshots(context),
@@ -203,8 +142,8 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
 
   Stream<QuerySnapshot> _getPanggilanStreamSnapshots(
       BuildContext context) async* {
-    final uid = await Provider.of(context).auth.getCurrentUID();
-    yield* Firestore.instance
+    final String uid = await Provider.of(context).auth.getCurrentUID();
+    yield* Provider.of(context).db
         .collection('panggilanData')
         .where('sellerId', isEqualTo: uid)
         .orderBy('statusPanggilan')
@@ -219,15 +158,8 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         .setData(json);
   }
 
-  _getUserSnapshots(String userId) async {
-    await Firestore.instance
-        .collection('userData')
-        .document(userId)
-        .get()
-        .then((value) => _cardTitle = value.data['nama']);
-  }
-
   _buildStatusCards(BuildContext context, DocumentSnapshot document) {
+
     return Card(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0))),
@@ -240,15 +172,15 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   .collection('userData')
                   .document(document['custId'])
                   .get(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData)
+              builder: (context, sn) {
+                if (!sn.hasData)
                   return Row(children: <Widget>[
                     Spacer(),
                     AutoSizeText('Tidak ada data yang tersedia'),
                     Spacer(),
                   ]);
                 return AutoSizeText(
-                  snapshot.data['nama'],
+                  sn.data['nama'],
                   maxLines: 1,
                   style: TextStyle(fontSize: 16),
                 );

@@ -22,6 +22,9 @@ class _SellerHomePageState extends State<SellerHomePage> {
   String _currentStatus = 'checkOut';
   Position _currentLocation;
 
+  List<String> user = List<String>();
+  List<GeoPoint> userWithLoc = List<GeoPoint>();
+
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
@@ -48,22 +51,19 @@ class _SellerHomePageState extends State<SellerHomePage> {
         target: LatLng(_currentLocation.latitude, _currentLocation.longitude),
         zoom: 16.0)));
 
-    _setDocument();
-    _setMarker();
   }
 
   _setDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
-    await Provider.of(context).db.collection('locData').document(uid).setData({
-      'latitude': _currentPosition.latitude,
-      'longitude': _currentPosition.longitude
-    });
+    await Provider.of(context).db.collection('locData').document(uid).setData(
+        {'location': GeoPoint(_currentPosition.latitude, _currentPosition.longitude)});
   }
 
   _setMarker() async {
-    List<String> user = List<String>();
-    List<String> userWithLoc = List<String>();
+
+    _getLocation();
+    _setDocument();
 
     QuerySnapshot snap = await Firestore.instance
         .collection('userData')
@@ -79,11 +79,10 @@ class _SellerHomePageState extends State<SellerHomePage> {
 
     for (int i = 0; i < snaps.documents.length; i++) {
       if (user.contains(snaps.documents[i].documentID)) {
-        userWithLoc.add(snaps.documents[i].documentID);
+        userWithLoc.add(snaps.documents[i].data['location']);
         _mapMarker.add(Marker(
           markerId: MarkerId(snaps.documents[i].documentID),
-          position: LatLng(snaps.documents[i].data['latitude'],
-              snaps.documents[i].data['longitude']),
+          position: LatLng(userWithLoc[i].latitude, userWithLoc[i].longitude),
         ));
       }
     }
@@ -184,7 +183,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
                             });
                           }),
                       IconButton(
-                          icon: Icon(Icons.add_road),
+                          icon: Icon(Icons.directions_bike),
                           iconSize: 40,
                           color: _iconTravelColor,
                           onPressed: () {
@@ -210,6 +209,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
         height: 400,
         child: Column(
           children: <Widget>[
+            Spacer(),
             Center(
               child: AutoSizeText(
                 'Anda sedang tidak berjualan..',
@@ -220,6 +220,11 @@ class _SellerHomePageState extends State<SellerHomePage> {
                     fontWeight: FontWeight.bold),
               ),
             ),
+            Container(
+              padding: EdgeInsets.all(20),
+                height: 350,
+                width: 300,
+                child: Image.asset('assets/images/store.png')),
             Spacer(),
           ],
         ),
@@ -243,7 +248,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
             ),
             SizedBox(height: 20),
             FutureBuilder(
-                future: _getLocation(),
+                future: _setMarker(),
                 builder: (context, snapshot) {
                   return Container(
                     height: 400,
@@ -266,6 +271,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
         height: 400,
         child: Column(
           children: <Widget>[
+            Spacer(),
             Center(
               child: AutoSizeText(
                 'Anda sedang menuju suatu lokasi..',
@@ -276,7 +282,12 @@ class _SellerHomePageState extends State<SellerHomePage> {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            Spacer(),
+            Container(
+                padding: EdgeInsets.all(20),
+                height: 350,
+                width: 300,
+                child: Image.asset('assets/images/distance.png')),
+            Spacer()
           ],
         ),
       );

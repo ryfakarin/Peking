@@ -41,51 +41,77 @@ class _customerProfilePageState extends State<customerProfilePage> {
         backgroundColor: Colors.transparent,
         elevation: 0.0,
         actions: <Widget>[
-          Row(children: [
-            IconButton(
-                padding: EdgeInsets.only(right: _width * 0.65),
-                icon: Icon(
-                  Icons.arrow_back,
-                  size: 28.0,
-                  color: Colors.green,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CustomerHomePage()));
-                }),
-            FlatButton(
+          Row(
+            children: [
+              IconButton(
+                  padding: EdgeInsets.only(right: _width * 0.65),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    size: 28.0,
+                    color: Colors.green,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CustomerHomePage()));
+                  }),
+              FlatButton(
                 padding: EdgeInsets.only(right: _width * 0.05),
                 child: Text("Log Out",
                     style: TextStyle(color: Colors.green, fontSize: 20.0)),
                 onPressed: () async {
-                  await Provider.of(context).auth.signOut();
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
-                }),
-          ]),
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Log out dari akun anda?"),
+                      actions: <Widget>[
+                        FlatButton(
+                          color: Colors.red[100],
+                          child: Text(
+                            "Kembali",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        FlatButton(
+                          color: Colors.green[100],
+                          child: Text(
+                            "Log Out",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          onPressed: () async {
+                            await Provider.of(context).auth.signOut();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()));
+                          },
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
       body: SingleChildScrollView(
         child: Container(
-          height: _height*0.6,
+          height: _height * 0.6,
           width: _width,
           child: Column(
             children: <Widget>[
               Spacer(),
-              Container(
-                height: _height * 0.2,
-                width: _width * 0.6,
-                margin: EdgeInsets.fromLTRB(105, 0, 105, 0),
-                padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                        fit: BoxFit.fitWidth,
-                        image: AssetImage('assets/images/brown.png'))),
-              ),
-              SizedBox(height: _height * 0.04),
               FutureBuilder(
                 future: _getDocument(),
                 builder: (context, snapshot) {

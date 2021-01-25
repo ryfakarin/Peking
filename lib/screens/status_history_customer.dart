@@ -140,7 +140,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
 
   Stream<QuerySnapshot> _getCurrPanggilanStreamSnapshots(
       BuildContext context) async* {
-    final uid = await Provider.of(context).auth.getCurrentUID();
+    final String uid = await Provider.of(context).auth.getCurrentUID();
     yield* Firestore.instance
         .collection('panggilanData')
         .where('custId', isEqualTo: uid)
