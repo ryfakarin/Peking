@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/profile_customer.dart';
@@ -11,10 +12,21 @@ class UpdateProfile extends StatefulWidget {
 }
 
 class _UpdateProfileState extends State<UpdateProfile> {
+
+  TextEditingController controller;
+  String hintText;
+
   UserModel _user = UserModel("", "", "", null);
 
   TextEditingController _namaController = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void setState(fn) {
+    // TODO: implement setState
+    super.setState(fn);
+    controller = TextEditingController(text: hintText);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,11 +86,23 @@ class _UpdateProfileState extends State<UpdateProfile> {
               FutureBuilder(
                 future: getDocument(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return inputBox(_namaController, _user.name);
-                  } else {
-                    return CircularProgressIndicator();
-                  }
+                  return Container(
+                    margin: EdgeInsets.fromLTRB(30, 0, 30, 0),
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.lightGreen),
+                          top: BorderSide(color: Colors.lightGreen),
+                          left: BorderSide(color: Colors.lightGreen),
+                          right: BorderSide(color: Colors.lightGreen),
+                        )),
+                    child: TextFormField(
+                      controller: _namaController,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  );
                 },
               ),
               SizedBox(height: _height * 0.01),
@@ -94,11 +118,23 @@ class _UpdateProfileState extends State<UpdateProfile> {
               FutureBuilder(
                 future: getDocument(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return inputBox(_phoneController, _user.phoneNumber);
-                  } else {
-                    return CircularProgressIndicator();
-                  }
+                  return Container(
+                    margin: EdgeInsets.fromLTRB(30, 0, 30, 0),
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.lightGreen),
+                          top: BorderSide(color: Colors.lightGreen),
+                          left: BorderSide(color: Colors.lightGreen),
+                          right: BorderSide(color: Colors.lightGreen),
+                        )),
+                    child: TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  );
                 },
               ),
               SizedBox(height: 30),
@@ -110,14 +146,16 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     borderRadius: new BorderRadius.circular(30.0)),
                 // validasi untuk nanti ke seller atau customer
                 onPressed: () async {
-                  if (_namaController.text != '' && _phoneController.text != "") {
+                  print(_namaController.text);
+                  if (_namaController.text == _user.name &&
+                      _phoneController.text == _user.phoneNumber) {
                     _user.name = _namaController.text;
                     _user.phoneNumber = _phoneController.text;
                     setDocument();
-                  } else if (_namaController.text != '') {
+                  } else if (_namaController.text == _user.name) {
                     _user.name = _namaController.text;
                     setDocument();
-                  } else if (_phoneController.text != "") {
+                  } else if (_phoneController.text == _user.phoneNumber) {
                     _user.phoneNumber = _phoneController.text;
                     setDocument();
                   }
@@ -148,26 +186,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
     );
   }
 
-  Container inputBox(TextEditingController controller, String hintText) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(30, 0, 30, 0),
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-      decoration: BoxDecoration(
-          border: Border(
-        bottom: BorderSide(color: Colors.lightGreen),
-        top: BorderSide(color: Colors.lightGreen),
-        left: BorderSide(color: Colors.lightGreen),
-        right: BorderSide(color: Colors.lightGreen),
-      )),
-      child: TextFormField(
-        controller: TextEditingController(text: hintText),
-        decoration: InputDecoration(
-            border: InputBorder.none,
-        ),
-      ),
-    );
-  }
-
   getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
     _user.uid = uid;
@@ -186,7 +204,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   setDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    String docId;
 
     await Provider.of(context)
         .db

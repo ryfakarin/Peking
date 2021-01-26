@@ -13,7 +13,6 @@ class statusAndHistorySeller extends StatefulWidget {
 }
 
 class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
-  String _cardTitle = '';
 
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
@@ -253,6 +252,10 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   ? FlatButton(
                       onPressed: () {
                         toBeSendtoDb(document, 4);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => this.build(context)));
                       },
                       color: Colors.green[100],
                       child: AutoSizeText(
@@ -280,6 +283,10 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   ? FlatButton(
                       onPressed: () {
                         toBeSendtoDb(document, 3);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => this.build(context)));
                       },
                       color: Colors.green[100],
                       child: AutoSizeText(
@@ -360,7 +367,31 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         FlatButton(
           color: Colors.green[100],
           onPressed: () {
-            toBeSendtoDb(document, 2);
+            showDialog(
+              context: context,
+              child: AlertDialog(
+                title: Text("Terima panggilan ini ?"),
+                actions: [
+                  FlatButton(
+                    child: Text("Kembali"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  FlatButton(
+                    child: Text("Terima"),
+                    onPressed: () {
+                      toBeSendtoDb(document, 2);
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => this.build(context)));
+                    },
+                  ),
+                ],
+              ),
+            );
           },
           child: AutoSizeText(
             'Terima Panggilan',
@@ -372,7 +403,31 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         FlatButton(
           color: Colors.red[100],
           onPressed: () {
-            toBeSendtoDb(document, 6);
+            showDialog(
+              context: context,
+              child: AlertDialog(
+                title: Text("Tolak panggilan ini ?"),
+                actions: [
+                  FlatButton(
+                    child: Text("Kembali"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  FlatButton(
+                    child: Text("Tolak"),
+                    onPressed: () {
+                      toBeSendtoDb(document, 6);
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => statusAndHistorySeller()));
+                    },
+                  ),
+                ],
+              ),
+            );
           },
           child: AutoSizeText(
             'Tolak Panggilan',

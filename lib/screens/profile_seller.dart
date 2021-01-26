@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/login.dart';
 import 'package:hehe/screens/updateMenu.dart';
-import 'package:hehe/screens/update_profile.dart';
 import 'package:hehe/screens/home_seller.dart';
+import 'package:hehe/widgets/customs.dart';
 import 'package:hehe/widgets/provider.dart';
 
 class sellerProfilePage extends StatefulWidget {
@@ -15,6 +15,8 @@ class sellerProfilePage extends StatefulWidget {
 
 class _sellerProfilePageState extends State<sellerProfilePage> {
   UserModel _user = UserModel("", "", "", null);
+
+  TextEditingController namaUser = TextEditingController();
 
   _getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
@@ -27,7 +29,19 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
         .then((result) {
       _user.phoneNumber = result.data['phoneNumber'];
       _user.name = result.data['nama'];
+      _user.uid = uid;
+      _user.tipeUser = result.data['tipeUser'];
     });
+  }
+
+  _setDocument(Map<String, dynamic> toJson) async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context)
+        .db
+        .collection('userData')
+        .document(uid)
+        .setData(_user.toJson());
   }
 
   @override
@@ -90,6 +104,9 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                                 builder: (context) => LoginPage()));
                       },
                     ),
+                    SizedBox(
+                      width: 20,
+                    ),
                   ],
                 ),
               );
@@ -106,55 +123,72 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
             child: Column(
               children: <Widget>[
                 SizedBox(height: _height * 0.18),
-                FutureBuilder(
-                  future: _getDocument(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return AutoSizeText(_user.name,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold));
-                    } else {
-                      return CircularProgressIndicator();
-                    }
-                  },
+                Row(
+                  children: [
+                    Spacer(),
+                    FutureBuilder(
+                      future: _getDocument(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return AutoSizeText(_user.name,
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold));
+                        } else {
+                          return CircularProgressIndicator();
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon:
+                          Icon(Icons.edit, color: Colors.green[800], size: 20),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return _inputNamaDialog('Nama anda', namaUser);
+                          },
+                        );
+                      },
+                    ),
+                    Spacer(),
+                  ],
                 ),
                 SizedBox(height: _height * 0.01),
-                FutureBuilder(
-                  future: _getDocument(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return AutoSizeText(_user.phoneNumber,
-                          style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 18,
-                              fontStyle: FontStyle.italic));
-                    } else {
-                      return CircularProgressIndicator();
-                    }
-                  },
+                Row(
+                  children: [
+                    Spacer(),
+                    FutureBuilder(
+                      future: _getDocument(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return AutoSizeText(_user.phoneNumber,
+                              style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 18,
+                                  fontStyle: FontStyle.italic));
+                        } else {
+                          return CircularProgressIndicator();
+                        }
+                      },
+                    ),
+                    IconButton(
+                      icon:
+                      Icon(Icons.edit, color: Colors.green[800], size: 18),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return _inputPhoneDialog('Nomor telepon anda', namaUser);
+                          },
+                        );
+                      },
+                    ),
+                    Spacer(),
+                  ],
                 ),
-                SizedBox(height: _height * 0.03),
-                RaisedButton(
-                  textColor: Colors.white,
-                  padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
-                  color: Colors.brown[300],
-                  shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(30.0)),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => UpdateProfile()));
-                  },
-                  child: Container(
-                    child: AutoSizeText('Ubah Profil',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                SizedBox(height: _height * 0.05),
+                SizedBox(height: _height * 0.08),
                 Row(
                   children: [
                     Container(
@@ -240,4 +274,153 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
       ),
     );
   }
+
+  Dialog _inputNamaDialog(
+      String inputTitle, TextEditingController inputController) {
+    return Dialog(
+      child: Stack(
+        children: <Widget>[
+          Container(
+            height: 200,
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: <Widget>[
+                AutoSizeText(
+                  inputTitle,
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 16),
+                ),
+                TextField(
+                  controller: inputController,
+                ),
+                SizedBox(height: 30),
+                Row(
+                  children: <Widget>[
+                    SizedBox(width: 40),
+                    RaisedButton(
+                        child: AutoSizeText(
+                          'Batal',
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey[800]),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                    SizedBox(width: 20),
+                    RaisedButton(
+                      child: AutoSizeText(
+                        'Kirim',
+                        maxLines: 1,
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey[800]),
+                      ),
+                      onPressed: () async {
+                        if (inputController.text == "") {
+                          warnSnackBar(context, "Nama tidak bisa kosong");
+                        } else {
+                          try {
+                            _user.name = inputController.text;
+                            print(_user.name);
+                            _setDocument(_user.toJson());
+                            Navigator.of(context).pop();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => this.build(context)));
+                            createSnackBar(context, "Berhasil mengganti nama");
+                          } on Exception catch (e) {
+                            print(e);
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Dialog _inputPhoneDialog(
+      String inputTitle, TextEditingController inputController) {
+    return Dialog(
+      child: Stack(
+        children: <Widget>[
+          Container(
+            height: 200,
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: <Widget>[
+                AutoSizeText(
+                  inputTitle,
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 16),
+                ),
+                TextField(
+                  controller: inputController,
+                ),
+                SizedBox(height: 30),
+                Row(
+                  children: <Widget>[
+                    SizedBox(width: 40),
+                    RaisedButton(
+                        child: AutoSizeText(
+                          'Batal',
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey[800]),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                    SizedBox(width: 20),
+                    RaisedButton(
+                      child: AutoSizeText(
+                        'Kirim',
+                        maxLines: 1,
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey[800]),
+                      ),
+                      onPressed: () async {
+                        if (inputController.text == "") {
+                          warnSnackBar(context, "Nomor telpon tidak bisa kosong");
+                        } else {
+                          try {
+                            // _user.name = inputController.text;
+                            // print(_user.name);
+                            // _setDocument(_user.toJson());
+                            // Navigator.of(context).pop();
+                            // Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //         builder: (context) => this.build(context)));
+                            // createSnackBar(context, "Berhasil mengganti nomor telpon");
+                          } on Exception catch (e) {
+                            print(e);
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

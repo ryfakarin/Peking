@@ -13,7 +13,6 @@ class StatusAndHistoryCust extends StatefulWidget {
 }
 
 class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
-  List<String> _cardTitle = List();
 
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);

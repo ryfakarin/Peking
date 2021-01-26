@@ -29,11 +29,12 @@ class _regSellerPageState extends State<regSellerPage> {
     final _height = MediaQuery.of(context).size.height;
 
     return Scaffold(
+        resizeToAvoidBottomPadding: false,
         body: Container(
       width: _width,
       height: _height,
       color: Colors.lightGreen[50],
-      child: SafeArea(
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(30.0),
           child: Column(
@@ -174,14 +175,7 @@ class _regSellerPageState extends State<regSellerPage> {
                           .then(
                         (ref) async {
                           if (ref.documents.length > 0) {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) => CustomDialog(
-                                  title: "Nomor anda sudah terdaftar",
-                                  description: " ",
-                                  primaryButtonText: "OK",
-                                  primaryButtonRoute: "/regSeller"),
-                            );
+                            warnSnackBar(context, "Nomor anda sudah terdaftar");
                           } else {
                             String userName = _namaController.text;
                             String uid = await Provider.of(context)
@@ -191,6 +185,8 @@ class _regSellerPageState extends State<regSellerPage> {
                           }
                         },
                       );
+                    } else {
+                      warnSnackBar(context, "Kolom tidak bisa kosong");
                     }
                   } on Exception catch (e) {
                     print(e);

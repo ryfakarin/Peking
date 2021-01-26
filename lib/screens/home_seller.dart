@@ -51,6 +51,8 @@ class _SellerHomePageState extends State<SellerHomePage> {
         target: LatLng(_currentLocation.latitude, _currentLocation.longitude),
         zoom: 16.0)));
 
+    _setDocument();
+
   }
 
   _setDocument() async {
@@ -58,34 +60,6 @@ class _SellerHomePageState extends State<SellerHomePage> {
 
     await Provider.of(context).db.collection('locData').document(uid).setData(
         {'location': GeoPoint(_currentPosition.latitude, _currentPosition.longitude)});
-  }
-
-  _setMarker() async {
-
-    _getLocation();
-    _setDocument();
-
-    QuerySnapshot snap = await Firestore.instance
-        .collection('userData')
-        .where('tipeUser', isEqualTo: 0)
-        .getDocuments();
-
-    for (int i = 0; i < snap.documents.length; i++) {
-      user.add(snap.documents[i].documentID);
-    }
-
-    QuerySnapshot snaps =
-        await Firestore.instance.collection('locData').getDocuments();
-
-    for (int i = 0; i < snaps.documents.length; i++) {
-      if (user.contains(snaps.documents[i].documentID)) {
-        userWithLoc.add(snaps.documents[i].data['location']);
-        _mapMarker.add(Marker(
-          markerId: MarkerId(snaps.documents[i].documentID),
-          position: LatLng(userWithLoc[i].latitude, userWithLoc[i].longitude),
-        ));
-      }
-    }
   }
 
   @override
@@ -248,7 +222,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
             ),
             SizedBox(height: 20),
             FutureBuilder(
-                future: _setMarker(),
+                future: _getLocation(),
                 builder: (context, snapshot) {
                   return Container(
                     height: 400,

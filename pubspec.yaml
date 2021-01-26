@@ -34,6 +34,7 @@ dependencies:
   provider: ^4.3.2+3
   international_phone_input: ^1.0.4
   auto_size_text: ^2.1.0
+  flushbar: ^1.10.4
 
 
 dev_dependencies:

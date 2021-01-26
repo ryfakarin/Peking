@@ -1,3 +1,4 @@
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
@@ -118,21 +119,20 @@ class CustomDialog extends StatelessWidget {
   }
 }
 
-Widget showAlert(String errorMessage) {
 
-  return Container(
-    color: Colors.redAccent[800],
-    width: double.infinity,
-    padding: EdgeInsets.all(8.0),
-    child: Row(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Icon(Icons.error_outline),
-        ),
-        Expanded(child: AutoSizeText(errorMessage, maxLines: 2, style: TextStyle(color: Colors.black),)),
-      ],
-    ),
-  );
+Widget createSnackBar(BuildContext context, String message) {
+  Flushbar(
+    flushbarPosition: FlushbarPosition.TOP,
+    message: message,
+    duration: Duration(seconds: 5),
+  )..show(context);
+}
 
+Widget warnSnackBar(BuildContext context, String message) {
+  Flushbar(
+    flushbarPosition: FlushbarPosition.TOP,
+    message: message,
+    backgroundColor: Colors.red[400],
+    duration: Duration(seconds: 5),
+  )..show(context);
 }

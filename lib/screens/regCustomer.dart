@@ -32,11 +32,12 @@ class _regCustomerPageState extends State<regCustomerPage> {
     final _height = MediaQuery.of(context).size.height;
 
     return Scaffold(
+        resizeToAvoidBottomPadding: false,
         body: Container(
       width: _width,
       height: _height,
       color: Colors.green[50],
-      child: SafeArea(
+      child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(30.0),
           child: Column(
@@ -114,26 +115,20 @@ class _regCustomerPageState extends State<regCustomerPage> {
                           .collection('userData')
                           .where('phoneNumber', isEqualTo: _phoneNumberCust)
                           .getDocuments()
-                          .then((ref) async {
-                        if (ref.documents.length > 0) {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => CustomDialog(
-                                title: "Nomor anda sudah terdaftar",
-                                description: " ",
-                                primaryButtonText: "OK",
-                                primaryButtonRoute: "/regCust"),
-                          );
-                        } else {
-                          String uid = await Provider.of(context)
-                              .auth
-                              .signUpUserWithPhone(
-                                  _phoneNumberCust, context, userName, _tipeUser);
-                        }
-                      });
-                      print(userName);
-                      print(_phoneNumberCust);
+                          .then(
+                        (ref) async {
+                          if (ref.documents.length > 0) {
+                            warnSnackBar(context, "Nomor anda sudah terdaftar");
+                          } else {
+                            String uid = await Provider.of(context)
+                                .auth
+                                .signUpUserWithPhone(_phoneNumberCust, context,
+                                    userName, _tipeUser);
+                          }
+                        },
+                      );
                     }
+                    warnSnackBar(context, "Kolom harus diisi");
                   } on Exception catch (e) {
                     print(e);
                   }

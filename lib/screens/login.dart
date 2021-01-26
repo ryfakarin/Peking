@@ -103,31 +103,20 @@ class _LoginPageState extends State<LoginPage>
                         .collection('userData')
                         .where('phoneNumber', isEqualTo: phoneNumber)
                         .getDocuments()
-                        .then((ref) {
-                      if (ref.documents.length > 0) {
-                        Provider.of(context)
-                            .auth
-                            .signInUserWithPhone(phoneNumber, context);
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) => CustomDialog(
-                              title: "Nomor anda belum terdaftar",
-                              description: " ",
-                              primaryButtonText: "OK",
-                              primaryButtonRoute: "/loginPage"),
-                        );
-                      }
-                    });
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => CustomDialog(
-                          title: "Masukkan nomor anda",
-                          description: " ",
-                          primaryButtonText: "OK",
-                          primaryButtonRoute: "/loginPage"),
+                        .then(
+                      (ref) {
+                        if (ref.documents.length > 0) {
+                          Provider.of(context)
+                              .auth
+                              .signInUserWithPhone(phoneNumber, context);
+                        } else {
+                          warnSnackBar(
+                              context, "Nomor telepon belum terdaftar");
+                        }
+                      },
                     );
+                  } else {
+                    warnSnackBar(context, "Nomor telepon tidak bisa kosong");
                   }
                 },
                 child: Container(

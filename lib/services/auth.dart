@@ -228,9 +228,11 @@ class AuthService {
         .then((ref) {
       if (ref.documents.length > 0) {
         if (ref.documents[0].data['tipeUser'] == 0) {
+          print('pembeli');
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => CustomerHomePage()));
-        } else if (ref.documents[0].data['tipeUser'] == 1 && ref.documents[0].data['tipeUser'] == 2){
+        } else {
+          print('penjual');
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => SellerHomePage()));
         }

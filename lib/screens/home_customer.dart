@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/screens/profile_customer.dart';
 import 'package:hehe/screens/status_history_customer.dart';
@@ -114,7 +115,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   _setDocument() async {
-    final uid = await Provider.of(context).auth.getCurrentUID();
+    final uidDoc = await FirebaseAuth.instance.currentUser();
+    String uid = uidDoc.uid;
 
     await Firestore.instance.collection('locData').document(uid).setData({
       'location':
@@ -151,11 +153,25 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
     for (int i = 0; i < snaps.documents.length; i++) {
       if (user.contains(snaps.documents[i].documentID)) {
+        DocumentSnapshot snapshot =
+        await Firestore.instance.collection('dataJualan').document(snaps.documents[i].documentID).get();
         userWithLoc.add(snaps.documents[i].data['location']);
-        _mapMarker.add(Marker(
-          markerId: MarkerId(snaps.documents[i].documentID),
-          position: LatLng(userWithLoc[i].latitude, userWithLoc[i].longitude),
-        ));
+        _mapMarker.add(
+          Marker(
+            markerId: MarkerId(snaps.documents[i].documentID),
+            position: LatLng(userWithLoc[i].latitude, userWithLoc[i].longitude),
+            infoWindow: InfoWindow(
+              title: snapshot.data['nama'],
+            ),
+            // onTap: () {
+            //   Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (context) =>
+            //               viewSellerPage(uidSeller: snaps.documents[i].documentID)));
+            // }
+          ),
+        );
       }
     }
   }
@@ -169,8 +185,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         .then((result) {
       setState(() {
         GeoPoint currPos = result.data['location'];
-        _currentPosition =
-            LatLng(currPos.latitude, currPos.longitude);
+        _currentPosition = LatLng(currPos.latitude, currPos.longitude);
       });
 
       navigateMap(_currentPosition);
@@ -368,10 +383,27 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               children: <Widget>[
                 Row(
                   children: [
-                    AutoSizeText(
-                      document['nama'],
-                      maxLines: 1,
-                      style: TextStyle(fontSize: 14),
+                    Column(
+                      children: [
+                        AutoSizeText(
+                          document['nama'],
+                          maxLines: 1,
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        document['tipe'] == 1
+                            ? AutoSizeText(
+                                'Keliling',
+                                maxLines: 1,
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.grey[800]),
+                              )
+                            : AutoSizeText(
+                                'Menetap',
+                                maxLines: 1,
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.grey[800]),
+                              ),
+                      ],
                     ),
                     Spacer(),
                     //IconButton(icon: Icon(Icons.favorite), onPressed: () {}),
