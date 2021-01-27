@@ -37,24 +37,18 @@ class _viewSellerPageState extends State<viewSellerPage> {
   }
 
   _panggilSeller() async {
-    final custId = await Provider
-        .of(context)
-        .auth
-        .getCurrentUID();
+    final custId = await Provider.of(context).auth.getCurrentUID();
     _panggilan.custId = custId;
 
     _panggilan.statusPanggilan = 1;
 
-    await Provider
-        .of(context)
+    await Provider.of(context)
         .db
         .collection('panggilanData')
         .add(_panggilan.toJson());
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => StatusAndHistoryCust()));
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => StatusAndHistoryCust()));
   }
 
   Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
@@ -67,113 +61,147 @@ class _viewSellerPageState extends State<viewSellerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final _width = MediaQuery
-        .of(context)
-        .size
-        .width;
-    final _height = MediaQuery
-        .of(context)
-        .size
-        .height;
+    final _width = MediaQuery.of(context).size.width;
+    final _height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       resizeToAvoidBottomPadding: false,
-      appBar: new AppBar(
-        leading: null,
-        toolbarHeight: _height * 0.1,
-        backgroundColor: Colors.transparent,
-        elevation: 0.0,
-        actions: <Widget>[
-          IconButton(
-            // padding: EdgeInsets.only(right: _width * 0.05),
-              icon: Icon(
-                Icons.arrow_back,
-                size: 28.0,
-                color: Colors.green,
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CustomerHomePage()));
-              }),
-          Spacer(),
-        ],
-      ),
       body: Container(
-        // color: Colors.pink[200],
-        height: _height * 0.8,
+        height: _height,
         width: _width,
-        padding: EdgeInsets.all(_width * 0.1),
-        child: SafeArea(
-          child: Column(
-            children: <Widget>[
-              FutureBuilder(
-                future: _getUser(),
-                builder: (context, snapshot) {
-                  return Column(
-                    children: <Widget>[
-                      AutoSizeText(
-                        _namaSeller,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 22),
-                      ),
-                      SizedBox(
-                        height: _height * 0.05,
-                      ),
-                      Row(
-                        children: <Widget>[
-                          AutoSizeText('Menu',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          Spacer()
-                        ],
-                      ),
-                      SizedBox(
-                        height: _height * 0.02,
-                      ),
-                      Row(
-                        children: <Widget>[
-                          Text('Nama Makanan', style: TextStyle(fontWeight: FontWeight.bold),),
-                          Spacer(),
-                          Text('Harga Makanan', style: TextStyle(fontWeight: FontWeight.bold),)
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                        height: _height * 0.3,
-                        width: _width,
-                        child: StreamBuilder(
-                          stream: getMenuStreamSnapshots(context),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData)
-                              return CircularProgressIndicator();
-                            return ListView.builder(
-                              itemCount: snapshot.data.documents.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return buildMenuCard(context,
-                                      snapshot.data.documents[index]);
-                              },
-                            );
-                          },
+        child: Stack(
+          children: <Widget>[
+            Container(
+              height: _height * 0.42,
+              width: _width,
+              color: Colors.yellow[700],
+              child: Image.asset('assets/images/viewSeller.png'),
+            ),
+            Positioned(
+              top: _height * 0.35,
+              child: Container(
+                height: _height * 0.7,
+                width: _width,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0),
+                  ),
+                ),
+                child: FutureBuilder(
+                  future: _getUser(),
+                  builder: (context, snapshot) {
+                    return Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: _height * 0.01,
                         ),
-                      ),
-                    ],
-                  );
-                },
+                        Row(
+                          children: <Widget>[
+                            SizedBox(
+                              width: _width * 0.02,
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                size: 28.0,
+                                color: Colors.yellow[800],
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            CustomerHomePage()));
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: _height * 0.005,
+                        ),
+                        Row(
+                          children: <Widget>[
+                            SizedBox(
+                              width: _width * 0.05,
+                            ),
+                            AutoSizeText(
+                              _namaSeller,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 22),
+                              maxLines: 1,
+                            ),
+                            Spacer(),
+                            FlatButton(
+                              onPressed: () async {
+                                _panggilan.sellerId = uidSeller;
+                                _panggilSeller();
+                              },
+                              child: AutoSizeText(
+                                'Panggil',
+                                maxLines: 1,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              color: Colors.yellow[800],
+                              shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: Colors.yellow[800],
+                                      width: 1,
+                                      style: BorderStyle.solid),
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                            SizedBox(
+                              width: _width * 0.05,
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: _height * 0.02,
+                        ),
+                        Container(
+                          color: Colors.grey[200],
+                          height: _height * 0.02,
+                        ),
+                        SizedBox(
+                          height: _height * 0.04,
+                        ),
+                        Row(
+                          children: <Widget>[
+                            SizedBox(
+                              width: _width * 0.08,
+                            ),
+                            AutoSizeText('Menu',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 24)),
+                            Spacer()
+                          ],
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 20, right: 20),
+                          height: _height * 0.4,
+                          width: _width,
+                          child: StreamBuilder(
+                            stream: getMenuStreamSnapshots(context),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData)
+                                return CircularProgressIndicator();
+                              return ListView.builder(
+                                  itemCount: snapshot.data.documents.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) =>
+                                          buildMenuCard(context,
+                                              snapshot.data.documents[index]));
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-              SizedBox(
-                height: _height * 0.05,
-              ),
-              FlatButton(
-                onPressed: () async {
-                  _panggilan.sellerId = uidSeller;
-                  _panggilSeller();
-                },
-                child: Text('Panggil'),
-                color: Colors.green[200],
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );
@@ -185,9 +213,15 @@ class _viewSellerPageState extends State<viewSellerPage> {
         padding: EdgeInsets.all(10),
         child: Row(
           children: <Widget>[
-            Text(document['namaMakanan']),
+            AutoSizeText(
+              document['namaMakanan'],
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             Spacer(),
-            Text('Rp. ' + document['hargaMakanan'])
+            Text(
+              'Rp. ' + document['hargaMakanan'],
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            )
           ],
         ),
       ),

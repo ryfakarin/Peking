@@ -13,7 +13,6 @@ class StatusAndHistoryCust extends StatefulWidget {
 }
 
 class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
-
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
@@ -36,55 +35,43 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         backgroundColor: Colors.transparent,
         elevation: 0.0,
         actions: <Widget>[
-          IconButton(
-              padding: EdgeInsets.fromLTRB(0, 0, _width * 0.01, 0),
-              icon: Icon(
-                Icons.arrow_back,
-                size: 28.0,
-                color: Colors.green,
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CustomerHomePage()));
-              }),
-          Container(
-            margin: EdgeInsets.fromLTRB(0, 0, _width * 0.03, 0),
-            height: 45,
-            width: 45,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/images/logo.PNG'))),
+          SizedBox(
+            width: _width * 0.03,
           ),
-          Container(
-              padding: EdgeInsets.fromLTRB(0, _height * 0.035, _width * 0.2, 0),
-              child: Text('Peking',
-                  style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 20,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold))),
+          IconButton(
+            padding: EdgeInsets.fromLTRB(0, 0, _width * 0.01, 0),
+            icon: Icon(
+              Icons.arrow_back,
+              size: 28.0,
+              color: Colors.yellow[700],
+            ),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => CustomerHomePage()));
+            },
+          ),
+          Spacer(),
           IconButton(
               icon: Icon(
                 Icons.history,
                 size: 28.0,
-                color: Colors.green,
+                color: Colors.yellow[700],
               ),
               onPressed: null),
           IconButton(
-              padding: EdgeInsets.fromLTRB(0, 0, _width * 0.12, 0),
-              icon: Icon(
-                Icons.account_circle,
-                size: 30.0,
-                color: Colors.green,
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => customerProfilePage()));
-              }),
+            padding: EdgeInsets.fromLTRB(0, 0, _width * 0.12, 0),
+            icon: Icon(
+              Icons.account_circle,
+              size: 30.0,
+              color: Colors.yellow[700],
+            ),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => customerProfilePage()));
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -100,7 +87,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
                       'Histori Pemanggilan',
                       maxLines: 1,
                       style: TextStyle(
-                          color: Colors.green[800],
+                          color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     )

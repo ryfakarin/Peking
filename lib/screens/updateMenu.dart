@@ -94,8 +94,8 @@ class _updateMenuPageState extends State<updateMenuPage> {
 
     return Scaffold(
       resizeToAvoidBottomPadding: false,
-      backgroundColor: Colors.amber[50],
       appBar: AppBar(
+          leading: null,
           toolbarHeight: _height * 0.07,
           backgroundColor: Colors.transparent,
           elevation: 0.0,
@@ -105,7 +105,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
                 icon: Icon(
                   Icons.arrow_back,
                   size: 28.0,
-                  color: Colors.green,
+                  color: Colors.yellow[700],
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -116,30 +116,32 @@ class _updateMenuPageState extends State<updateMenuPage> {
           ]),
       body: SingleChildScrollView(
         child: Container(
-          height: _height * 0.8,
           width: _width,
-          child: Padding(
-            padding: EdgeInsets.all(_width * 0.08),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    AutoSizeText('Nama Jualan: ',
-                        maxLines: 1, style: TextStyle(fontSize: 18)),
-                    IconButton(
-                        icon: Icon(Icons.edit,
-                            color: Colors.green[800], size: 20),
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return _inputDialog(
-                                    'Nama jualan anda', _namaController);
-                              });
-                        }),
-                  ],
-                ),
-                FutureBuilder(
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: _height * 0.04),
+              Row(
+                children: <Widget>[
+                  SizedBox(width: _width * 0.04),
+                  AutoSizeText('Nama Jualan: ',
+                      maxLines: 1, style: TextStyle(fontSize: 18)),
+                  IconButton(
+                      icon:
+                          Icon(Icons.edit, color: Colors.yellow[800], size: 20),
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return _inputDialog(
+                                  'Nama jualan anda', _namaController);
+                            });
+                      }),
+                ],
+              ),
+              Row(
+                children: [
+                  SizedBox(width: _width * 0.04),
+                  FutureBuilder(
                     future: _getDocument(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done) {
@@ -152,70 +154,86 @@ class _updateMenuPageState extends State<updateMenuPage> {
                             _jualan.namaJualan,
                             maxLines: 1,
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                         );
                       } else {
                         return CircularProgressIndicator();
                       }
-                    }),
-                SizedBox(height: _height * 0.05),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: _height * 0.05),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.yellow[800],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0),
+                  ),
+                ),
+                  child: Column(
                     children: <Widget>[
-                      AutoSizeText(
-                        'Menu',
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
+                      SizedBox(height: _height * 0.05),
+                      Row(
+                        children: [
+                          SizedBox(width: _width * 0.06),
+                          AutoSizeText(
+                            'Menu',
+                            style:
+                                TextStyle(fontSize: 20),
+                          ),
+                          SizedBox(width: _width * 0.25),
+                          AutoSizeText(
+                            'Harga',
+                            style:
+                                TextStyle(fontSize: 20),
+                          ),
+                          Spacer(),
+                        ],
                       ),
-                      Spacer(),
-                      AutoSizeText(
-                        'Harga',
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
+                      SizedBox(height: _height * 0.03),
+                      Container(
+                        height: _height * 0.05,
+                        width: _width,
+                        padding: EdgeInsets.only(left: _width * 0.05, right: _width * 0.05),
+                        child: InkWell(
+                          child: Card(
+                            margin: EdgeInsets.all(0),
+                            child: Icon(Icons.add),
+                          ),
+                          onTap: () {
+                            try {
+                              return showDialog(
+                                  context: context, builder: (context) => _inputMenu());
+                            } on Exception catch (e) {
+                              print(e);
+                            }
+                          },
+                        ),
                       ),
-                      Spacer(),
+                      Container(
+                        padding: EdgeInsets.only(left: _width * 0.05, right: _width * 0.05, top: _height*0.02),
+                        height: _height * 0.8,
+                        width: _width,
+                        child: StreamBuilder(
+                          stream: _getMenuStreamSnapshots(context),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData)
+                              return Center(child: CircularProgressIndicator());
+                            return ListView.builder(
+                                itemCount: snapshot.data.documents.length,
+                                itemBuilder: (BuildContext context, int index) =>
+                                    _buildMenuCard(
+                                        context, snapshot.data.documents[index]));
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Container(
-                  height: _height * 0.05,
-                  width: _width,
-                  child: InkWell(
-                    child: Card(
-                      child: Icon(Icons.add),
-                    ),
-                    onTap: () {
-                      try {
-                        return showDialog(
-                            context: context,
-                            builder: (context) => _inputMenu());
-                      } on Exception catch (e) {
-                        print(e);
-                      }
-                    },
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: 10),
-                  height: _height * 0.4,
-                  width: _width,
-                  child: StreamBuilder(
-                    stream: _getMenuStreamSnapshots(context),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData)
-                        return Center(child: CircularProgressIndicator());
-                      return ListView.builder(
-                          itemCount: snapshot.data.documents.length,
-                          itemBuilder: (BuildContext context, int index) =>
-                              _buildMenuCard(
-                                  context, snapshot.data.documents[index]));
-                    },
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
@@ -239,9 +257,9 @@ class _updateMenuPageState extends State<updateMenuPage> {
             padding: EdgeInsets.all(10),
             child: Row(
               children: <Widget>[
-                Text(document['namaMakanan']),
+                AutoSizeText(document['namaMakanan'], style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                 Spacer(),
-                Text(document['hargaMakanan']),
+                AutoSizeText(document['hargaMakanan'], style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),),
                 Spacer(),
                 IconButton(
                   icon: Icon(Icons.delete),

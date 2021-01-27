@@ -21,6 +21,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   Panggilan _panggilan = Panggilan("", "", null);
   Future resultsLoaded;
 
+  bool isExpanded = false;
+
   final Set<Marker> _mapMarker = {};
   LatLng _currentPosition = LatLng(0, 0);
   Position _currentLocation;
@@ -43,6 +45,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   _onSearchChanged() {
     showResultList();
+    setState(() {
+      isExpanded = !isExpanded;
+    });
   }
 
   void dispose() {
@@ -153,8 +158,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
     for (int i = 0; i < snaps.documents.length; i++) {
       if (user.contains(snaps.documents[i].documentID)) {
-        DocumentSnapshot snapshot =
-        await Firestore.instance.collection('dataJualan').document(snaps.documents[i].documentID).get();
+        DocumentSnapshot snapshot = await Firestore.instance
+            .collection('dataJualan')
+            .document(snaps.documents[i].documentID)
+            .get();
         userWithLoc.add(snaps.documents[i].data['location']);
         _mapMarker.add(
           Marker(
@@ -199,150 +206,153 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
     return Scaffold(
       resizeToAvoidBottomPadding: false,
-      appBar: new AppBar(
-        leading: null,
-        toolbarHeight: _height * 0.1,
-        backgroundColor: Colors.transparent,
-        elevation: 0.0,
-        actions: <Widget>[
-          Container(
-            margin: EdgeInsets.fromLTRB(0, 0, _width * 0.03, 0),
-            height: 45,
-            width: 45,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/images/logo.PNG'))),
-          ),
-          Container(
-              padding: EdgeInsets.fromLTRB(0, _height * 0.04, _width * 0.3, 0),
-              child: Text('Peking',
-                  style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 20,
-                      // fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold))),
-          IconButton(
-              icon: Icon(
-                Icons.history,
-                size: 28.0,
-                color: Colors.green,
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => StatusAndHistoryCust()));
-              }),
-          IconButton(
-              padding: EdgeInsets.fromLTRB(0, 0, _width * 0.1, 0),
-              icon: Icon(
-                Icons.account_circle,
-                size: 30.0,
-                color: Colors.green,
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => customerProfilePage()));
-              }),
-        ],
-      ),
-      body: Container(
-        child: SafeArea(
+      body: SingleChildScrollView(
+        child: Container(
           child: Column(
             children: <Widget>[
               Container(
-                padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: "Cari pedagang..",
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      color: Colors.lightGreen,
-                      onPressed: () {
-                        _searchController.clear();
+                width: _width,
+                height: _height * 0.53,
+                child: Stack(
+                  children: <Widget>[
+                    FutureBuilder(
+                      future: _setMarker(),
+                      builder: (context, doc) {
+                        return Container(
+                          width: _width,
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                                target: _currentPosition, zoom: 16.0),
+                            mapType: MapType.normal,
+                            markers: _mapMarker,
+                            myLocationEnabled: true,
+                            onMapCreated: _mapCreated,
+                            padding: EdgeInsets.only(
+                              top: 20.0,
+                            ),
+                          ),
+                        );
                       },
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: _height * 0.02),
-              Stack(
-                children: <Widget>[
-                  FutureBuilder(
-                    future: _setMarker(),
-                    builder: (context, doc) {
-                      return Container(
-                        margin: EdgeInsets.only(left: 20, right: 20),
-                        height: _height * 0.4,
-                        color: Colors.lightGreen,
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                              target: _currentPosition, zoom: 16.0),
-                          mapType: MapType.normal,
-                          markers: _mapMarker,
-                          myLocationEnabled: true,
-                          onMapCreated: _mapCreated,
+                    Positioned(
+                      top: _height * 0.06,
+                      right: _width * 0.14,
+                      child: RawMaterialButton(
+                        child: Icon(
+                          Icons.history,
+                          size: 30.0,
+                          color: Colors.yellow[600],
                         ),
-                      );
-                    },
-                  ),
-                  Center(
-                    child: Container(
-                      height: _height * 0.2,
-                      width: _width * 0.8,
-                      child: ListView.builder(
-                        itemCount: resultList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Card(
-                            color: Colors.grey[600],
-                            child: InkWell(
-                              child: Padding(
-                                padding: EdgeInsets.all(10),
-                                child: Column(
-                                  children: <Widget>[
-                                    AutoSizeText(
-                                      resultList[index],
-                                      maxLines: 1,
-                                      style: TextStyle(color: Colors.white),
-                                    )
-                                  ],
-                                ),
-                              ),
-                              onTap: () {
-                                String key = _searchResult.keys.firstWhere(
-                                    (k) =>
-                                        _searchResult[k] == resultList[index],
-                                    orElse: () => null);
-                                getLocationfromDB(key);
-                              },
-                            ),
-                          );
+                        padding: EdgeInsets.all(3.0),
+                        shape: CircleBorder(),
+                        fillColor: Colors.white,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      StatusAndHistoryCust()));
                         },
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: _height * 0.02),
-              Container(
-                padding: EdgeInsets.only(right: 20, left: 20),
-                height: _height * 0.3,
-                width: _width,
-                child: StreamBuilder(
-                  stream: _getSellerStreamSnapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) return CircularProgressIndicator();
-                    return ListView.builder(
-                        itemCount: snapshot.data.documents.length,
-                        itemBuilder: (BuildContext context, int index) =>
-                            _buildSellerCard(
-                                context, snapshot.data.documents[index]));
-                  },
+                    Positioned(
+                      top: _height * 0.06,
+                      right: 0,
+                      child: RawMaterialButton(
+                        child: Icon(
+                          Icons.account_circle,
+                          size: 30.0,
+                          color: Colors.yellow[600],
+                        ),
+                        padding: EdgeInsets.all(3.0),
+                        shape: CircleBorder(),
+                        fillColor: Colors.white,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => customerProfilePage()));
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              )
+              ),
+              Container(
+                width: _width,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0),
+                  ),
+                ),
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: _height * 0.03,
+                    ),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(
+                          width: _width * 0.08,
+                        ),
+                        AutoSizeText(
+                          'Cari Pedagang',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                    SizedBox(
+                      height: _height * 0.015,
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: _width * 0.05, right: _width * 0.05),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              const Radius.circular(30.0),
+                            ),
+                          ),
+                          hintText: "Cari nama dagangan",
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.clear),
+                            color: Colors.lightGreen,
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                isExpanded = isExpanded;
+                              });
+                            },
+                          ),
+                        ),
+                        controller: _searchController,
+                      ),
+                    ),
+                    Container(
+                      height: _height*0.8,
+                      width: _width,
+                      padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                      child: StreamBuilder(
+                        stream: _getSellerStreamSnapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData)
+                            return CircularProgressIndicator();
+                          return ListView.builder(
+                              itemCount: snapshot.data.documents.length,
+                              itemBuilder: (BuildContext context, int index) =>
+                                  _buildSellerCard(
+                                      context, snapshot.data.documents[index]));
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -364,7 +374,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
     QuerySnapshot query = await Firestore.instance
         .collection('locData')
-        .where('location', isLessThan: greaterGeopoint)
+        //.where('location', isLessThan: greaterGeopoint)
         .where('location', isGreaterThan: lesserGeopoint)
         .getDocuments();
 
@@ -372,13 +382,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   Widget _buildSellerCard(BuildContext context, DocumentSnapshot document) {
-    //if(userVal.contains(document.documentID))
-    return new SingleChildScrollView(
+    return SingleChildScrollView(
       child: InkWell(
         child: Card(
-          color: Colors.grey[200],
+          color: Colors.white,
           child: Padding(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(15.0),
             child: Column(
               children: <Widget>[
                 Row(
@@ -388,20 +397,25 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                         AutoSizeText(
                           document['nama'],
                           maxLines: 1,
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         document['tipe'] == 1
                             ? AutoSizeText(
                                 'Keliling',
                                 maxLines: 1,
                                 style: TextStyle(
-                                    fontSize: 10, color: Colors.grey[800]),
+                                    fontSize: 12,
+                                    color: Colors.grey[800],
+                                    fontWeight: FontWeight.bold),
                               )
                             : AutoSizeText(
                                 'Menetap',
                                 maxLines: 1,
                                 style: TextStyle(
-                                    fontSize: 10, color: Colors.grey[800]),
+                                    fontSize: 10,
+                                    color: Colors.grey[800],
+                                    fontWeight: FontWeight.bold),
                               ),
                       ],
                     ),
@@ -409,11 +423,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                     //IconButton(icon: Icon(Icons.favorite), onPressed: () {}),
                     document['tipe'] == 1
                         ? FlatButton(
+                            color: Colors.yellow[700],
                             child: AutoSizeText(
                               "Panggil",
                               maxLines: 1,
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.green[800]),
+                              style:
+                                  TextStyle(fontSize: 14, color: Colors.white),
                             ),
                             onPressed: () {
                               showDialog(

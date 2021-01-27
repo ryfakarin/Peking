@@ -48,81 +48,93 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
   Widget build(BuildContext context) {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
-    // TODO: implement build
     return Scaffold(
-      backgroundColor: Colors.lime[50],
-      appBar: new AppBar(
+      appBar: AppBar(
         leading: null,
         toolbarHeight: _height * 0.07,
         backgroundColor: Colors.transparent,
         elevation: 0.0,
         actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                size: 28.0,
-                color: Colors.green,
+          Row(
+            children: [
+              IconButton(
+                  padding: EdgeInsets.only(right: _width * 0.55),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    size: 28.0,
+                    color: Colors.yellow[800],
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SellerHomePage()));
+                  }),
+              FlatButton(
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        color: Colors.yellow[800],
+                        width: 1,
+                        style: BorderStyle.solid),
+                    borderRadius: BorderRadius.circular(30)),
+                color: Colors.yellow[800],
+                child: AutoSizeText("Log Out",
+                    style: TextStyle(color: Colors.white, fontSize: 18.0)),
+                onPressed: () async {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("Log out dari akun anda?"),
+                      actions: <Widget>[
+                        FlatButton(
+                          color: Colors.red[100],
+                          child: Text(
+                            "Kembali",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        FlatButton(
+                          color: Colors.green[200],
+                          child: Text(
+                            "Log Out",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          onPressed: () async {
+                            await Provider.of(context).auth.signOut();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()));
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SellerHomePage()));
-              }),
-          Spacer(),
-          FlatButton(
-            child: AutoSizeText("Log Out",
-                style: TextStyle(color: Colors.green, fontSize: 20.0)),
-            onPressed: () async {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text("Log out dari akun anda?"),
-                  actions: <Widget>[
-                    FlatButton(
-                      color: Colors.red[100],
-                      child: Text(
-                        "Kembali",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    FlatButton(
-                      color: Colors.green[100],
-                      child: Text(
-                        "Log Out",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      onPressed: () async {
-                        await Provider.of(context).auth.signOut();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginPage()));
-                      },
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                  ],
-                ),
-              );
-            },
+              SizedBox(
+                width: 20,
+              ),
+            ],
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Container(
           width: _width,
-          //color: Colors.pink[50],
-          child: Padding(
-            padding: EdgeInsets.all(0),
             child: Column(
               children: <Widget>[
-                SizedBox(height: _height * 0.18),
+                Container(
+                  width: _width,
+                  child: Image.asset('assets/images/sellerIcon.png'),
+                  height: _height * 0.3,
+                ),
                 Row(
                   children: [
                     Spacer(),
@@ -155,7 +167,6 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                     Spacer(),
                   ],
                 ),
-                SizedBox(height: _height * 0.01),
                 Row(
                   children: [
                     Spacer(),
@@ -175,12 +186,13 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                     ),
                     IconButton(
                       icon:
-                      Icon(Icons.edit, color: Colors.green[800], size: 18),
+                          Icon(Icons.edit, color: Colors.green[800], size: 18),
                       onPressed: () {
                         showDialog(
                           context: context,
                           builder: (context) {
-                            return _inputPhoneDialog('Nomor telepon anda', namaUser);
+                            return _inputPhoneDialog(
+                                'Nomor telepon anda', namaUser);
                           },
                         );
                       },
@@ -188,65 +200,82 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                     Spacer(),
                   ],
                 ),
-                SizedBox(height: _height * 0.08),
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.only(left: 30, right: 10),
-                      child: AutoSizeText('Menu',
-                          style: TextStyle(
-                              color: Colors.brown[800],
-                              fontSize: 20,
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.bold)),
-                    ),
-                    Spacer(),
-                    RaisedButton(
-                      textColor: Colors.black,
-                      padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
-                      color: Colors.white60,
-                      shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.black, width: 2),
-                          borderRadius: new BorderRadius.circular(30.0)),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => updateMenuPage()));
-                      },
-                      child: Container(
-                        child: AutoSizeText('Ubah Menu',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                    SizedBox(
-                      width: _width * 0.05,
-                    )
-                  ],
-                ),
+                SizedBox(height: _height * 0.05),
                 Container(
-                  padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                  height: _height * 0.6,
-                  width: _width,
-                  child: StreamBuilder(
-                    stream: getMenuStreamSnapshots(context),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return CircularProgressIndicator();
-                      return ListView.builder(
-                          itemCount: snapshot.data.documents.length,
-                          itemBuilder: (BuildContext context, int index) =>
-                              buildMenuCard(
-                                  context, snapshot.data.documents[index]));
-                    },
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[800],
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      topRight: Radius.circular(30.0),
+                    ),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: _height*0.02,),
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(left: 30, right: 10),
+                            child: AutoSizeText('Menu',
+                                style: TextStyle(
+                                    color: Colors.brown[800],
+                                    fontSize: 20,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          Spacer(),
+                          RaisedButton(
+                            textColor: Colors.black,
+                            padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(color: Colors.black, width: 2),
+                                borderRadius: new BorderRadius.circular(30.0)),
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => updateMenuPage()));
+                            },
+                            child: Container(
+                              child: AutoSizeText('Ubah Menu',
+                                  style: TextStyle(
+                                    color: Colors.yellow[900],
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                          SizedBox(
+                            width: _width * 0.05,
+                          )
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                        height: _height * 0.6,
+                        width: _width,
+                        child: StreamBuilder(
+                          stream: getMenuStreamSnapshots(context),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData)
+                              return CircularProgressIndicator();
+                            return ListView.builder(
+                                itemCount: snapshot.data.documents.length,
+                                itemBuilder:
+                                    (BuildContext context, int index) =>
+                                        buildMenuCard(context,
+                                            snapshot.data.documents[index]));
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
@@ -262,12 +291,12 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
     return new SingleChildScrollView(
       child: Card(
         child: Padding(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(20),
           child: Row(
             children: <Widget>[
-              Text(document['namaMakanan']),
+              AutoSizeText(document['namaMakanan'], style: TextStyle(fontWeight: FontWeight.bold)),
               Spacer(),
-              Text('Rp. ' + document['hargaMakanan'])
+              AutoSizeText('Rp. ' + document['hargaMakanan'], style: TextStyle(fontWeight: FontWeight.bold))
             ],
           ),
         ),
@@ -395,7 +424,8 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                       ),
                       onPressed: () async {
                         if (inputController.text == "") {
-                          warnSnackBar(context, "Nomor telpon tidak bisa kosong");
+                          warnSnackBar(
+                              context, "Nomor telpon tidak bisa kosong");
                         } else {
                           try {
                             // _user.name = inputController.text;
@@ -422,5 +452,4 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
       ),
     );
   }
-
 }

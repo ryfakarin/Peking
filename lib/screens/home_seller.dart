@@ -90,7 +90,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
                   padding: EdgeInsets.only(top: _height * 0.04),
                   child: Text('Peking',
                       style: TextStyle(
-                          color: Colors.green,
+                          color: Colors.yellow[800],
                           fontSize: 20,
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.bold))),
@@ -99,7 +99,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
                   icon: Icon(
                     Icons.history,
                     size: 28.0,
-                    color: Colors.green,
+                    color: Colors.yellow[800],
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -111,7 +111,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
                   icon: Icon(
                     Icons.account_circle,
                     size: 30.0,
-                    color: Colors.green,
+                    color: Colors.yellow[800],
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -128,47 +128,66 @@ class _SellerHomePageState extends State<SellerHomePage> {
                 children: <Widget>[
                   SizedBox(height: _height * 0.03),
                   dynamicWidget(),
-                  ButtonBar(
-                    mainAxisSize: MainAxisSize.min,
-                    buttonPadding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-                    children: <Widget>[
-                      IconButton(
-                          icon: Icon(Icons.house),
-                          iconSize: 40,
-                          color: _iconOutColor,
-                          onPressed: () {
-                            setState(() {
-                              _iconOutColor = _iconClickColor;
-                              _iconInColor = _iconNotColor;
-                              _iconTravelColor = _iconNotColor;
-                              _currentStatus = 'checkOut';
-                            });
-                          }),
-                      IconButton(
-                          icon: Icon(Icons.store),
-                          iconSize: 40,
-                          color: _iconInColor,
-                          onPressed: () {
-                            setState(() {
-                              _iconOutColor = _iconNotColor;
-                              _iconInColor = _iconClickColor;
-                              _iconTravelColor = _iconNotColor;
-                              _currentStatus = 'checkIn';
-                            });
-                          }),
-                      IconButton(
-                          icon: Icon(Icons.directions_bike),
-                          iconSize: 40,
-                          color: _iconTravelColor,
-                          onPressed: () {
-                            setState(() {
-                              _iconOutColor = _iconNotColor;
-                              _iconInColor = _iconNotColor;
-                              _iconTravelColor = _iconClickColor;
-                              _currentStatus = 'travel';
-                            });
-                          })
-                    ],
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(70.0),
+                        topRight: Radius.circular(70.0),
+                        bottomLeft: Radius.circular(70.0),
+                        bottomRight: Radius.circular(70.0)
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 5,
+                          blurRadius: 7,
+                          offset: Offset(0, 3), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: ButtonBar(
+                      mainAxisSize: MainAxisSize.min,
+                      buttonPadding: EdgeInsets.fromLTRB(30, 0, 30, 0),
+                      children: <Widget>[
+                        IconButton(
+                            icon: Icon(Icons.house),
+                            iconSize: 40,
+                            color: _iconOutColor,
+                            onPressed: () {
+                              setState(() {
+                                _iconOutColor = _iconClickColor;
+                                _iconInColor = _iconNotColor;
+                                _iconTravelColor = _iconNotColor;
+                                _currentStatus = 'checkOut';
+                              });
+                            }),
+                        IconButton(
+                            icon: Icon(Icons.store),
+                            iconSize: 40,
+                            color: _iconInColor,
+                            onPressed: () {
+                              setState(() {
+                                _iconOutColor = _iconNotColor;
+                                _iconInColor = _iconClickColor;
+                                _iconTravelColor = _iconNotColor;
+                                _currentStatus = 'checkIn';
+                              });
+                            }),
+                        IconButton(
+                            icon: Icon(Icons.directions_bike),
+                            iconSize: 40,
+                            color: _iconTravelColor,
+                            onPressed: () {
+                              setState(() {
+                                _iconOutColor = _iconNotColor;
+                                _iconInColor = _iconNotColor;
+                                _iconTravelColor = _iconClickColor;
+                                _currentStatus = 'travel';
+                              });
+                            })
+                      ],
+                    ),
                   )
                 ],
               ),
@@ -190,15 +209,14 @@ class _SellerHomePageState extends State<SellerHomePage> {
                 maxLines: 1,
                 style: TextStyle(
                     color: Colors.brown[600],
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                    fontSize: 20),
               ),
             ),
             Container(
               padding: EdgeInsets.all(20),
                 height: 350,
                 width: 300,
-                child: Image.asset('assets/images/store.png')),
+                child: Image.asset('assets/images/offSeller.png')),
             Spacer(),
           ],
         ),
@@ -214,7 +232,6 @@ class _SellerHomePageState extends State<SellerHomePage> {
                 "Lokasi anda sekarang",
                 maxLines: 1,
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
                     fontSize: 20,
                     fontStyle: FontStyle.italic,
                     color: Colors.green[800]),
@@ -252,15 +269,14 @@ class _SellerHomePageState extends State<SellerHomePage> {
                 maxLines: 1,
                 style: TextStyle(
                     color: Colors.brown[600],
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                    fontSize: 20),
               ),
             ),
             Container(
                 padding: EdgeInsets.all(20),
                 height: 350,
                 width: 300,
-                child: Image.asset('assets/images/distance.png')),
+                child: Image.asset('assets/images/travelSeller.png')),
             Spacer()
           ],
         ),

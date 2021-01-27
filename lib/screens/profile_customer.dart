@@ -5,7 +5,6 @@ import 'package:hehe/screens/login.dart';
 import 'package:hehe/widgets/customs.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'home_customer.dart';
-import 'package:hehe/screens/update_profile.dart';
 
 class customerProfilePage extends StatefulWidget {
   @override
@@ -48,7 +47,6 @@ class _customerProfilePageState extends State<customerProfilePage> {
     final _width = MediaQuery.of(context).size.width;
     final _height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.lime[50],
       appBar: new AppBar(
         leading: null,
         toolbarHeight: _height * 0.07,
@@ -58,11 +56,11 @@ class _customerProfilePageState extends State<customerProfilePage> {
           Row(
             children: [
               IconButton(
-                  padding: EdgeInsets.only(right: _width * 0.65),
+                  padding: EdgeInsets.only(right: _width * 0.55),
                   icon: Icon(
                     Icons.arrow_back,
                     size: 28.0,
-                    color: Colors.green,
+                    color: Colors.yellow[800],
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -71,9 +69,15 @@ class _customerProfilePageState extends State<customerProfilePage> {
                             builder: (context) => CustomerHomePage()));
                   }),
               FlatButton(
-                padding: EdgeInsets.only(right: _width * 0.05),
-                child: Text("Log Out",
-                    style: TextStyle(color: Colors.green, fontSize: 20.0)),
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        color: Colors.yellow[800],
+                        width: 1,
+                        style: BorderStyle.solid),
+                    borderRadius: BorderRadius.circular(30)),
+                color: Colors.yellow[800],
+                child: AutoSizeText("Log Out",
+                    style: TextStyle(color: Colors.white, fontSize: 18.0)),
                 onPressed: () async {
                   showDialog(
                     context: context,
@@ -94,7 +98,7 @@ class _customerProfilePageState extends State<customerProfilePage> {
                           width: 20,
                         ),
                         FlatButton(
-                          color: Colors.green[100],
+                          color: Colors.green[200],
                           child: Text(
                             "Log Out",
                             style: TextStyle(color: Colors.black),
@@ -115,6 +119,7 @@ class _customerProfilePageState extends State<customerProfilePage> {
                   );
                 },
               ),
+              SizedBox(width: _width * 0.05),
             ],
           ),
         ],
@@ -125,6 +130,12 @@ class _customerProfilePageState extends State<customerProfilePage> {
           width: _width,
           child: Column(
             children: <Widget>[
+              Spacer(),
+              Container(
+                height: _height * 0.35,
+                width: _width,
+                child: Image.asset('assets/images/custIcon.png'),
+              ),
               Spacer(),
               Row(
                 children: [

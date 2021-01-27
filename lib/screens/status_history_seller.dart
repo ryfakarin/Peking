@@ -38,38 +38,26 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         backgroundColor: Colors.transparent,
         elevation: 0.0,
         actions: <Widget>[
+          SizedBox(
+            width: _width * 0.03,
+          ),
           IconButton(
               padding: EdgeInsets.fromLTRB(0, 0, _width * 0.01, 0),
               icon: Icon(
                 Icons.arrow_back,
                 size: 28.0,
-                color: Colors.green,
+                color: Colors.yellow[800],
               ),
               onPressed: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => SellerHomePage()));
               }),
-          Container(
-            margin: EdgeInsets.fromLTRB(0, 0, _width * 0.03, 0),
-            height: 45,
-            width: 45,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage('assets/images/logo.PNG'))),
-          ),
-          Container(
-              padding: EdgeInsets.fromLTRB(0, _height * 0.035, _width * 0.2, 0),
-              child: Text('Peking',
-                  style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 20,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold))),
+          Spacer(),
           IconButton(
               icon: Icon(
                 Icons.history,
                 size: 28.0,
-                color: Colors.green,
+                color: Colors.yellow[800],
               ),
               onPressed: null),
           IconButton(
@@ -77,7 +65,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
               icon: Icon(
                 Icons.account_circle,
                 size: 30.0,
-                color: Colors.green,
+                color: Colors.yellow[800],
               ),
               onPressed: () {
                 Navigator.push(
@@ -100,7 +88,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                       'Daftar Pemanggilan',
                       maxLines: 1,
                       style: TextStyle(
-                          color: Colors.green[800],
+                          color: Colors.yellow[800],
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     )
