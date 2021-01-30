@@ -88,6 +88,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     _currentPosition =
         LatLng(_currentLocation.latitude, _currentLocation.longitude);
 
+    navigateMap(_currentPosition);
+
     _setDocument();
   }
 

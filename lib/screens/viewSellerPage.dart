@@ -7,7 +7,6 @@ import 'package:hehe/screens/status_history_customer.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'home_customer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 
 class viewSellerPage extends StatefulWidget {
   final String uidSeller;
