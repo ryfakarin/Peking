@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/user.dart';
+import 'package:hehe/screens/home_seller_menetap.dart';
 import 'package:hehe/screens/login.dart';
 import 'package:hehe/screens/updateMenu.dart';
 import 'package:hehe/screens/home_seller.dart';
@@ -58,18 +59,24 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
           Row(
             children: [
               IconButton(
-                  padding: EdgeInsets.only(right: _width * 0.55),
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 28.0,
-                    color: Colors.yellow[800],
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SellerHomePage()));
-                  }),
+                padding: EdgeInsets.only(right: _width * 0.55),
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 28.0,
+                  color: Colors.yellow[800],
+                ),
+                onPressed: () {
+                  _user.tipeUser == 1
+                      ? Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SellerHomePage()))
+                      : Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SellerStayHomePage()));
+                },
+              ),
               FlatButton(
                 shape: RoundedRectangleBorder(
                     side: BorderSide(
@@ -84,13 +91,16 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text("Log out dari akun anda?"),
+                      title: Text(
+                        "Log out dari akun anda?",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: Colors.yellow[700],
                       actions: <Widget>[
                         FlatButton(
-                          color: Colors.red[100],
                           child: Text(
                             "Kembali",
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: Colors.white),
                           ),
                           onPressed: () {
                             Navigator.pop(context);
@@ -100,10 +110,9 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                           width: 20,
                         ),
                         FlatButton(
-                          color: Colors.green[200],
                           child: Text(
                             "Log Out",
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: Colors.red[800]),
                           ),
                           onPressed: () async {
                             await Provider.of(context).auth.signOut();
@@ -128,154 +137,155 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
       body: SingleChildScrollView(
         child: Container(
           width: _width,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: _width,
-                  child: Image.asset('assets/images/sellerIcon.png'),
-                  height: _height * 0.3,
+          child: Column(
+            children: <Widget>[
+              Container(
+                width: _width,
+                child: Image.asset(
+                  'assets/images/sellerIcon.png',
                 ),
-                Row(
-                  children: [
-                    Spacer(),
-                    FutureBuilder(
-                      future: _getDocument(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return AutoSizeText(_user.name,
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold));
-                        } else {
-                          return CircularProgressIndicator();
-                        }
-                      },
-                    ),
-                    IconButton(
-                      icon:
-                          Icon(Icons.edit, color: Colors.green[800], size: 20),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return _inputNamaDialog('Nama anda', namaUser);
-                          },
-                        );
-                      },
-                    ),
-                    Spacer(),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Spacer(),
-                    FutureBuilder(
-                      future: _getDocument(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return AutoSizeText(_user.phoneNumber,
-                              style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 18,
-                                  fontStyle: FontStyle.italic));
-                        } else {
-                          return CircularProgressIndicator();
-                        }
-                      },
-                    ),
-                    IconButton(
-                      icon:
-                          Icon(Icons.edit, color: Colors.green[800], size: 18),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return _inputPhoneDialog(
-                                'Nomor telepon anda', namaUser);
-                          },
-                        );
-                      },
-                    ),
-                    Spacer(),
-                  ],
-                ),
-                SizedBox(height: _height * 0.05),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.yellow[800],
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30.0),
-                      topRight: Radius.circular(30.0),
-                    ),
+                height: _height * 0.3,
+              ),
+              Row(
+                children: [
+                  Spacer(),
+                  FutureBuilder(
+                    future: _getDocument(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return AutoSizeText(_user.name,
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold));
+                      } else {
+                        return CircularProgressIndicator();
+                      }
+                    },
                   ),
-                  child: Column(
-                    children: <Widget>[
-                      SizedBox(height: _height*0.02,),
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.only(left: 30, right: 10),
-                            child: AutoSizeText('Menu',
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.green[800], size: 20),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return _inputNamaDialog('Nama anda', namaUser);
+                        },
+                      );
+                    },
+                  ),
+                  Spacer(),
+                ],
+              ),
+              Row(
+                children: [
+                  Spacer(),
+                  FutureBuilder(
+                    future: _getDocument(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return AutoSizeText(_user.phoneNumber,
+                            style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 18,
+                                fontStyle: FontStyle.italic));
+                      } else {
+                        return CircularProgressIndicator();
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.green[800], size: 18),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return _inputPhoneDialog(
+                              'Nomor telepon anda', namaUser);
+                        },
+                      );
+                    },
+                  ),
+                  Spacer(),
+                ],
+              ),
+              SizedBox(height: _height * 0.02),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.yellow[800],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0),
+                  ),
+                ),
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: _height * 0.02,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(left: 30, right: 10),
+                          child: AutoSizeText('Menu',
+                              style: TextStyle(
+                                  color: Colors.brown[800],
+                                  fontSize: 20,
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                        Spacer(),
+                        RaisedButton(
+                          textColor: Colors.black,
+                          padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.black, width: 2),
+                              borderRadius: new BorderRadius.circular(30.0)),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => updateMenuPage()));
+                          },
+                          child: Container(
+                            child: AutoSizeText('Ubah Menu',
                                 style: TextStyle(
-                                    color: Colors.brown[800],
-                                    fontSize: 20,
-                                    fontStyle: FontStyle.italic,
+                                    color: Colors.yellow[900],
+                                    fontSize: 14,
                                     fontWeight: FontWeight.bold)),
                           ),
-                          Spacer(),
-                          RaisedButton(
-                            textColor: Colors.black,
-                            padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(color: Colors.black, width: 2),
-                                borderRadius: new BorderRadius.circular(30.0)),
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => updateMenuPage()));
-                            },
-                            child: Container(
-                              child: AutoSizeText('Ubah Menu',
-                                  style: TextStyle(
-                                    color: Colors.yellow[900],
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                          ),
-                          SizedBox(
-                            width: _width * 0.05,
-                          )
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                        height: _height * 0.6,
-                        width: _width,
-                        child: StreamBuilder(
-                          stream: getMenuStreamSnapshots(context),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData)
-                              return CircularProgressIndicator();
-                            return ListView.builder(
-                                itemCount: snapshot.data.documents.length,
-                                itemBuilder:
-                                    (BuildContext context, int index) =>
-                                        buildMenuCard(context,
-                                            snapshot.data.documents[index]));
-                          },
                         ),
+                        SizedBox(
+                          width: _width * 0.05,
+                        )
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                      height: _height * 0.6,
+                      width: _width,
+                      child: StreamBuilder(
+                        stream: getMenuStreamSnapshots(context),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData)
+                            return CircularProgressIndicator();
+                          return ListView.builder(
+                              itemCount: snapshot.data.documents.length,
+                              itemBuilder: (BuildContext context, int index) =>
+                                  buildMenuCard(
+                                      context, snapshot.data.documents[index]));
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 
   Stream<QuerySnapshot> getMenuStreamSnapshots(BuildContext context) async* {
@@ -294,9 +304,11 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
           padding: EdgeInsets.all(20),
           child: Row(
             children: <Widget>[
-              AutoSizeText(document['namaMakanan'], style: TextStyle(fontWeight: FontWeight.bold)),
+              AutoSizeText(document['namaMakanan'],
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               Spacer(),
-              AutoSizeText('Rp. ' + document['hargaMakanan'], style: TextStyle(fontWeight: FontWeight.bold))
+              AutoSizeText('Rp. ' + document['hargaMakanan'],
+                  style: TextStyle(fontWeight: FontWeight.bold))
             ],
           ),
         ),

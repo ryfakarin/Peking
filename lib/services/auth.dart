@@ -6,8 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_customer.dart';
 import 'package:hehe/screens/home_seller.dart';
-import 'package:hehe/screens/login.dart';
-import 'package:hehe/screens/regSeller.dart';
+import 'package:hehe/screens/home_seller_menetap.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -32,187 +31,199 @@ class AuthService {
   Future<String> signUpUserWithPhone(
       String phone, BuildContext context, String userName, int tipeUser) {
     _auth.verifyPhoneNumber(
-        phoneNumber: phone,
-        timeout: Duration(seconds: 0),
-        verificationCompleted: (AuthCredential authCredential) {
-          _auth.signInWithCredential(authCredential).then((AuthResult result) {
-            if (tipeUser == 0) {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => CustomerHomePage()));
-              Navigator.pop(context);
-            } else {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SellerHomePage()));
-              Navigator.pop(context);
-            }
-          }).catchError((e) {
-            return "error";
-          });
-        },
-        verificationFailed: (AuthException exception) {
-          return 'error';
-        },
-        codeSent: (String verificationId, [int forceResendToken]) {
-          final _codeController = TextEditingController();
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text("Kode Verifikasi Anda"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly
-                    ],
-                    controller: _codeController,
-                  )
-                ],
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  color: Colors.red[100],
-                  child: Text(
-                    "Kembali",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                SizedBox(
-                  width: 30,
-                ),
-                FlatButton(
-                  color: Colors.lightGreen,
-                  child: Text("Submit"),
-                  textColor: Colors.white,
-                  onPressed: () {
-                    var _credential = PhoneAuthProvider.getCredential(
-                        verificationId: verificationId,
-                        smsCode: _codeController.text.trim());
-                    _auth.signInWithCredential(_credential).then(
-                      (AuthResult result) async {
-                        String uid = await result.user.uid;
-                        createUserToDatabase(uid, userName, phone, tipeUser);
-                        if (tipeUser == 0) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => CustomerHomePage()));
-                          Navigator.pop(context);
-                        } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SellerHomePage()));
-                          Navigator.pop(context);
-                        }
-                      },
-                    ).catchError(
-                      (e) {
-                        return "error";
-                      },
-                    );
-                  },
-                ),
-                SizedBox(
-                  width: 30,
-                ),
+      phoneNumber: phone,
+      timeout: Duration(seconds: 0),
+      verificationCompleted: (AuthCredential authCredential) {
+        _auth.signInWithCredential(authCredential).then((AuthResult result) {
+          if (tipeUser == 0) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CustomerHomePage()));
+            Navigator.pop(context);
+          } else if (tipeUser == 1) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SellerHomePage()));
+            Navigator.pop(context);
+          } else {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SellerStayHomePage()));
+
+          }
+        }).catchError((e) {
+          return "error";
+        });
+      },
+      verificationFailed: (AuthException exception) {
+        return 'error';
+      },
+      codeSent: (String verificationId, [int forceResendToken]) {
+        final _codeController = TextEditingController();
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: Text("Kode Verifikasi Anda"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                  controller: _codeController,
+                )
               ],
             ),
-          );
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          verificationId = verificationId;
-          print(verificationId);
-          print("Timeout");
-        });
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.red[100],
+                child: Text(
+                  "Kembali",
+                  style: TextStyle(color: Colors.black),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(
+                width: 30,
+              ),
+              FlatButton(
+                color: Colors.lightGreen,
+                child: Text("Submit"),
+                textColor: Colors.white,
+                onPressed: () {
+                  var _credential = PhoneAuthProvider.getCredential(
+                      verificationId: verificationId,
+                      smsCode: _codeController.text.trim());
+                  _auth.signInWithCredential(_credential).then(
+                    (AuthResult result) async {
+                      String uid = await result.user.uid;
+                      createUserToDatabase(uid, userName, phone, tipeUser);
+                      if (tipeUser == 0) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CustomerHomePage()));
+                        Navigator.pop(context);
+                      } else if (tipeUser == 1) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SellerHomePage()));
+                        Navigator.pop(context);
+                      } else if (tipeUser == 2) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SellerStayHomePage()));
+                        Navigator.pop(context);
+                      }
+                    },
+                  ).catchError(
+                    (e) {
+                      return "error";
+                    },
+                  );
+                },
+              ),
+              SizedBox(
+                width: 30,
+              ),
+            ],
+          ),
+        );
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        verificationId = verificationId;
+        print(verificationId);
+        print("Timeout");
+      },
+    );
   }
 
   // register and sign in with phone number
   Future signInUserWithPhone(String phone, BuildContext context) {
     _auth.verifyPhoneNumber(
-        phoneNumber: phone,
-        timeout: Duration(seconds: 0),
-        verificationCompleted: (AuthCredential authCredential) {
-          _auth.signInWithCredential(authCredential).then((AuthResult result) {
-            navigateUser(phone, context);
-            Navigator.pop(context);
-          }).catchError((e) {
-            return "error";
-          });
-        },
-        verificationFailed: (AuthException exception) {
-          return 'error';
-        },
-        codeSent: (String verificationId, [int forceResendToken]) {
-          final _codeController = TextEditingController();
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text("Kode Verifikasi Anda"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly
-                    ],
-                    controller: _codeController,
-                  )
-                ],
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  color: Colors.red[100],
-                  child: Text(
-                    "Kembali",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    },
-                ),
-                SizedBox(
-                  width: 30,
-                ),
-                FlatButton(
-                  color: Colors.lightGreen,
-                  child: Text("Submit"),
-                  textColor: Colors.white,
-                  onPressed: () {
-                    var _credential = PhoneAuthProvider.getCredential(
-                        verificationId: verificationId,
-                        smsCode: _codeController.text.trim());
-                    _auth.signInWithCredential(_credential).then(
-                      (AuthResult result) async {
-                        navigateUser(phone, context);
-                        Navigator.pop(context);
-                      },
-                    ).catchError(
-                      (e) {
-                        print("error");
-                      },
-                    );
-                  },
-                ),
-                SizedBox(
-                  width: 30,
-                ),
+      phoneNumber: phone,
+      timeout: Duration(seconds: 0),
+      verificationCompleted: (AuthCredential authCredential) {
+        _auth.signInWithCredential(authCredential).then((AuthResult result) {
+          navigateUser(phone, context);
+          Navigator.pop(context);
+        }).catchError((e) {
+          return "error";
+        });
+      },
+      verificationFailed: (AuthException exception) {
+        return 'error';
+      },
+      codeSent: (String verificationId, [int forceResendToken]) {
+        final _codeController = TextEditingController();
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: Text("Kode Verifikasi Anda"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                  controller: _codeController,
+                )
               ],
             ),
-          );
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          verificationId = verificationId;
-          print(verificationId);
-          print("Timeout");
-        });
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.red[100],
+                child: Text(
+                  "Kembali",
+                  style: TextStyle(color: Colors.black),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(
+                width: 30,
+              ),
+              FlatButton(
+                color: Colors.lightGreen,
+                child: Text("Submit"),
+                textColor: Colors.white,
+                onPressed: () {
+                  var _credential = PhoneAuthProvider.getCredential(
+                      verificationId: verificationId,
+                      smsCode: _codeController.text.trim());
+                  _auth.signInWithCredential(_credential).then(
+                    (AuthResult result) async {
+                      navigateUser(phone, context);
+                      Navigator.pop(context);
+                    },
+                  ).catchError(
+                    (e) {
+                      print("error");
+                    },
+                  );
+                },
+              ),
+              SizedBox(
+                width: 30,
+              ),
+            ],
+          ),
+        );
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        verificationId = verificationId;
+        print(verificationId);
+        print("Timeout");
+      },
+    );
   }
 
   // sign out
@@ -231,10 +242,14 @@ class AuthService {
           print('pembeli');
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => CustomerHomePage()));
-        } else {
+        } else if (ref.documents[0].data['tipeUser'] == 1) {
           print('penjual');
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => SellerHomePage()));
+        } else {
+          print('penjual');
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => SellerStayHomePage()));
         }
       }
     });

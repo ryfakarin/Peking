@@ -3,9 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hehe/model/panggilan.dart';
+import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_seller.dart';
 import 'package:hehe/screens/profile_seller.dart';
 import 'package:hehe/widgets/provider.dart';
+
+import 'home_seller_menetap.dart';
 
 class statusAndHistorySeller extends StatefulWidget {
   @override
@@ -13,12 +16,28 @@ class statusAndHistorySeller extends StatefulWidget {
 }
 
 class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
-
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
 
+  UserModel _user = UserModel("", "", "", null);
   Panggilan _panggilan = Panggilan("", "", null);
+
+  _getDocument() async {
+    final uid = await Provider.of(context).auth.getCurrentUID();
+
+    await Provider.of(context)
+        .db
+        .collection('userData')
+        .document(uid)
+        .get()
+        .then((result) {
+      _user.phoneNumber = result.data['phoneNumber'];
+      _user.name = result.data['nama'];
+      _user.uid = uid;
+      _user.tipeUser = result.data['tipeUser'];
+    });
+  }
 
   _mapCreated(controller) {
     setState(() {
@@ -41,38 +60,43 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
           SizedBox(
             width: _width * 0.03,
           ),
-          IconButton(
-              padding: EdgeInsets.fromLTRB(0, 0, _width * 0.01, 0),
-              icon: Icon(
-                Icons.arrow_back,
-                size: 28.0,
-                color: Colors.yellow[800],
-              ),
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SellerHomePage()));
-              }),
+          FutureBuilder(
+            future: _getDocument(),
+            builder: (context, snapshot) {
+              return IconButton(
+                padding: EdgeInsets.fromLTRB(0, 0, _width * 0.01, 0),
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 28.0,
+                  color: Colors.yellow[800],
+                ),
+                onPressed: () {
+                  _user.tipeUser == 1
+                      ? Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SellerHomePage()))
+                      : Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SellerStayHomePage()));
+                },
+              );
+            },
+          ),
           Spacer(),
           IconButton(
-              icon: Icon(
-                Icons.history,
-                size: 28.0,
-                color: Colors.yellow[800],
-              ),
-              onPressed: null),
-          IconButton(
-              padding: EdgeInsets.fromLTRB(0, 0, _width * 0.12, 0),
-              icon: Icon(
-                Icons.account_circle,
-                size: 30.0,
-                color: Colors.yellow[800],
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => sellerProfilePage()));
-              }),
+            padding: EdgeInsets.fromLTRB(0, 0, _width * 0.12, 0),
+            icon: Icon(
+              Icons.account_circle,
+              size: 30.0,
+              color: Colors.yellow[800],
+            ),
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => sellerProfilePage()));
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -130,7 +154,8 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
   Stream<QuerySnapshot> _getPanggilanStreamSnapshots(
       BuildContext context) async* {
     final String uid = await Provider.of(context).auth.getCurrentUID();
-    yield* Provider.of(context).db
+    yield* Provider.of(context)
+        .db
         .collection('panggilanData')
         .where('sellerId', isEqualTo: uid)
         .orderBy('statusPanggilan')
@@ -145,8 +170,24 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         .setData(json);
   }
 
-  _buildStatusCards(BuildContext context, DocumentSnapshot document) {
+  _setTime(String docId, int status) async {
+    await Provider.of(context)
+        .db
+        .collection('panggilanData')
+        .document(docId)
+        .setData({status: Timestamp.now()});
+  }
 
+  void toBeSendtoDb(DocumentSnapshot document, int status) {
+    String docId = document.documentID;
+    _panggilan.custId = document['custId'];
+    _panggilan.sellerId = document['sellerId'];
+    _panggilan.statusPanggilan = status;
+    _setData(docId, _panggilan.toJson());
+    _setTime(docId, status);
+  }
+
+  _buildStatusCards(BuildContext context, DocumentSnapshot document) {
     return Card(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0))),
@@ -166,10 +207,38 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                     AutoSizeText('Tidak ada data yang tersedia'),
                     Spacer(),
                   ]);
-                return AutoSizeText(
-                  sn.data['nama'],
-                  maxLines: 1,
-                  style: TextStyle(fontSize: 16),
+                return Container(
+                  width: 200,
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: 170,
+                        child: AutoSizeText(
+                          sn.data['nama'],
+                          maxLines: 2,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Spacer(),
+                      document.data['statusPanggilan'] != 4 &&
+                              document.data['statusPanggilan'] != 6
+                          ? AutoSizeText('Proses',
+                              maxLines: 1,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green[800],
+                                  fontWeight: FontWeight.w400))
+                          : AutoSizeText('Selesai',
+                              maxLines: 1,
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w400))
+                    ],
+                  ),
                 );
               }),
           children: <Widget>[
@@ -184,142 +253,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
     );
   }
 
-  Widget _buildPanggilanSelesai(DocumentSnapshot document) {
-    return document['statusPanggilan'] == 4
-        ? Card(
-            color: Colors.green[50],
-            child: Container(
-              padding: EdgeInsets.all(15),
-              child: Row(
-                children: <Widget>[
-                  AutoSizeText(
-                    "Pemanggilan telah selesai",
-                    maxLines: 1,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  Spacer(),
-                  Icon(
-                    Icons.check,
-                    color: Colors.green,
-                  )
-                ],
-              ),
-            ),
-          )
-        : Padding(padding: EdgeInsets.zero);
-  }
-
-  Widget _buildSellerPerjalanan(DocumentSnapshot document) {
-    return document['statusPanggilan'] != 1 &&
-            document['statusPanggilan'] != 2 &&
-            document['statusPanggilan'] != 6
-        ? ExpansionTile(
-            title: AutoSizeText(
-              'Penjual dalam perjalanan',
-              maxLines: 1,
-              style: TextStyle(fontSize: 14),
-            ),
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 20, right: 20),
-                height: 350,
-                color: Colors.lightGreen,
-                child: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: _currentPosition, zoom: 14.0),
-                  mapType: MapType.normal,
-                  markers: _mapMarker,
-                  myLocationEnabled: true,
-                  onMapCreated: _mapCreated,
-                ),
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              document['statusPanggilan'] == 3
-                  ? FlatButton(
-                      onPressed: () {
-                        toBeSendtoDb(document, 4);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => this.build(context)));
-                      },
-                      color: Colors.green[100],
-                      child: AutoSizeText(
-                        'Saya sudah sampai',
-                        maxLines: 1,
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    )
-                  : Padding(padding: EdgeInsets.zero),
-            ],
-          )
-        : Padding(padding: EdgeInsets.zero);
-  }
-
-  Widget _buildSellerBerangkat(DocumentSnapshot document) {
-    return document['statusPanggilan'] != 1 && document['statusPanggilan'] != 6
-        ? ExpansionTile(
-            title: AutoSizeText(
-              'Konfirmasi pemesanan',
-              maxLines: 1,
-              style: TextStyle(fontSize: 14),
-            ),
-            children: <Widget>[
-              document['statusPanggilan'] == 2
-                  ? FlatButton(
-                      onPressed: () {
-                        toBeSendtoDb(document, 3);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => this.build(context)));
-                      },
-                      color: Colors.green[100],
-                      child: AutoSizeText(
-                        'Saya berangkat',
-                        maxLines: 1,
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    )
-                  : Center(
-                      child: Icon(
-                        Icons.check,
-                        color: Colors.green,
-                      ),
-                    ),
-              SizedBox(
-                height: 10,
-              ),
-            ],
-          )
-        : Padding(padding: EdgeInsets.zero);
-  }
-
-  Widget _buildTolakPanggilan(DocumentSnapshot document) {
-    return document['statusPanggilan'] != 6
-        ? Padding(
-            padding: EdgeInsets.zero,
-          )
-        : Card(
-            child: Container(
-              color: Colors.red[50],
-              padding: EdgeInsets.all(15),
-              child: Row(
-                children: <Widget>[
-                  AutoSizeText(
-                    'Anda menolak pemanggilan ini',
-                    maxLines: 1,
-                    style: TextStyle(fontSize: 14),
-                  )
-                ],
-              ),
-            ),
-          );
-  }
-
-  ExpansionTile _buildRow1(DocumentSnapshot document) {
+  Widget _buildRow1(DocumentSnapshot document) {
     return ExpansionTile(
       title: AutoSizeText(
         'Konfirmasi pemanggilan',
@@ -358,7 +292,9 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
             showDialog(
               context: context,
               child: AlertDialog(
-                title: Text("Terima panggilan ini ?"),
+                title: Text(_user.tipeUser == 1
+                    ? "Terima panggilan ini ?"
+                    : "Menerima pembeli?"),
                 actions: [
                   FlatButton(
                     child: Text("Kembali"),
@@ -372,9 +308,9 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                       toBeSendtoDb(document, 2);
                       Navigator.of(context).pop();
                       Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => this.build(context)));
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => this.build(context)));
                     },
                   ),
                 ],
@@ -394,7 +330,9 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
             showDialog(
               context: context,
               child: AlertDialog(
-                title: Text("Tolak panggilan ini ?"),
+                title: Text(_user.tipeUser == 1
+                    ? "Tolak panggilan ini?"
+                    : "Tolak pembeli?"),
                 actions: [
                   FlatButton(
                     child: Text("Kembali"),
@@ -428,11 +366,179 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
     );
   }
 
-  void toBeSendtoDb(DocumentSnapshot document, int status) {
-    String docId = document.documentID;
-    _panggilan.custId = document['custId'];
-    _panggilan.sellerId = document['sellerId'];
-    _panggilan.statusPanggilan = status;
-    _setData(docId, _panggilan.toJson());
+  Widget _buildTolakPanggilan(DocumentSnapshot document) {
+    return document['statusPanggilan'] != 6
+        ? Padding(
+            padding: EdgeInsets.zero,
+          )
+        : Card(
+            child: Container(
+              color: Colors.red[50],
+              padding: EdgeInsets.all(15),
+              child: Row(
+                children: <Widget>[
+                  AutoSizeText(
+                    _user.tipeUser == 1
+                        ? 'Anda menolak pemanggilan ini'
+                        : 'Pembeli tidak menjadi membeli',
+                    maxLines: 1,
+                    style: TextStyle(fontSize: 14),
+                  )
+                ],
+              ),
+            ),
+          );
+  }
+
+  Widget _buildSellerBerangkat(DocumentSnapshot document) {
+    return document['statusPanggilan'] != 1 && document['statusPanggilan'] != 6
+        ? _user.tipeUser == 1
+            ? ExpansionTile(
+                title: AutoSizeText(
+                  'Konfirmasi pemesanan',
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 14),
+                ),
+                children: <Widget>[
+                  document['statusPanggilan'] == 2
+                      ? FlatButton(
+                          onPressed: () {
+                            toBeSendtoDb(document, 3);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => this.build(context)));
+                          },
+                          color: Colors.green[100],
+                          child: AutoSizeText(
+                            'Saya berangkat',
+                            maxLines: 1,
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.green,
+                          ),
+                        ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ],
+              )
+            : Card(
+                child: Container(
+                  color: Colors.lightGreen[50],
+                  padding: EdgeInsets.all(15),
+                  child: Row(
+                    children: <Widget>[
+                      AutoSizeText(
+                        'Menunggu pembeli berangkat',
+                        maxLines: 1,
+                        style: TextStyle(fontSize: 14),
+                      )
+                    ],
+                  ),
+                ),
+              )
+        : Padding(padding: EdgeInsets.zero);
+  }
+
+  Widget _buildSellerPerjalanan(DocumentSnapshot document) {
+    return document['statusPanggilan'] != 1 &&
+            document['statusPanggilan'] != 2 &&
+            document['statusPanggilan'] != 6
+        ? _user.tipeUser == 1
+            ? ExpansionTile(
+                title: AutoSizeText(
+                  'Penjual dalam perjalanan',
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 14),
+                ),
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(left: 20, right: 20),
+                    height: 350,
+                    color: Colors.lightGreen,
+                    child: GoogleMap(
+                      initialCameraPosition:
+                          CameraPosition(target: _currentPosition, zoom: 14.0),
+                      mapType: MapType.normal,
+                      markers: _mapMarker,
+                      myLocationEnabled: true,
+                      onMapCreated: _mapCreated,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  document['statusPanggilan'] == 3
+                      ? FlatButton(
+                          onPressed: () {
+                            toBeSendtoDb(document, 4);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => this.build(context)));
+                          },
+                          color: Colors.green[100],
+                          child: AutoSizeText(
+                            'Saya sudah sampai',
+                            maxLines: 1,
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        )
+                      : Padding(padding: EdgeInsets.zero),
+                ],
+              )
+            : ExpansionTile(
+                title: AutoSizeText(
+                  'Pembeli dalam perjalanan',
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 14),
+                ),
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(left: 20, right: 20),
+                    height: 350,
+                    color: Colors.lightGreen,
+                    child: GoogleMap(
+                      initialCameraPosition:
+                          CameraPosition(target: _currentPosition, zoom: 14.0),
+                      mapType: MapType.normal,
+                      markers: _mapMarker,
+                      myLocationEnabled: true,
+                      onMapCreated: _mapCreated,
+                    ),
+                  ),
+                ],
+              )
+        : Padding(padding: EdgeInsets.zero);
+  }
+
+  Widget _buildPanggilanSelesai(DocumentSnapshot document) {
+    return document['statusPanggilan'] == 4
+        ? Card(
+            color: Colors.green[50],
+            child: Container(
+              padding: EdgeInsets.all(15),
+              child: Row(
+                children: <Widget>[
+                  AutoSizeText(
+                    "Pemanggilan telah selesai",
+                    maxLines: 1,
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Spacer(),
+                  Icon(
+                    Icons.check,
+                    color: Colors.green,
+                  )
+                ],
+              ),
+            ),
+          )
+        : Padding(padding: EdgeInsets.zero);
   }
 }

@@ -52,14 +52,15 @@ class _SellerHomePageState extends State<SellerHomePage> {
         zoom: 16.0)));
 
     _setDocument();
-
   }
 
   _setDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
 
-    await Provider.of(context).db.collection('locData').document(uid).setData(
-        {'location': GeoPoint(_currentPosition.latitude, _currentPosition.longitude)});
+    await Provider.of(context).db.collection('locData').document(uid).setData({
+      'location':
+          GeoPoint(_currentPosition.latitude, _currentPosition.longitude)
+    });
   }
 
   @override
@@ -132,11 +133,10 @@ class _SellerHomePageState extends State<SellerHomePage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(70.0),
-                        topRight: Radius.circular(70.0),
-                        bottomLeft: Radius.circular(70.0),
-                        bottomRight: Radius.circular(70.0)
-                      ),
+                          topLeft: Radius.circular(70.0),
+                          topRight: Radius.circular(70.0),
+                          bottomLeft: Radius.circular(70.0),
+                          bottomRight: Radius.circular(70.0)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.5),
@@ -207,13 +207,11 @@ class _SellerHomePageState extends State<SellerHomePage> {
               child: AutoSizeText(
                 'Anda sedang tidak berjualan..',
                 maxLines: 1,
-                style: TextStyle(
-                    color: Colors.brown[600],
-                    fontSize: 20),
+                style: TextStyle(color: Colors.brown[600], fontSize: 20),
               ),
             ),
             Container(
-              padding: EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 height: 350,
                 width: 300,
                 child: Image.asset('assets/images/offSeller.png')),
@@ -239,21 +237,23 @@ class _SellerHomePageState extends State<SellerHomePage> {
             ),
             SizedBox(height: 20),
             FutureBuilder(
-                future: _getLocation(),
-                builder: (context, snapshot) {
-                  return Container(
-                    height: 400,
-                    color: Colors.lightGreen,
-                    child: GoogleMap(
-                      initialCameraPosition:
-                          CameraPosition(target: _currentPosition, zoom: 16.0),
-                      mapType: MapType.normal,
-                      markers: _mapMarker,
-                      myLocationEnabled: true,
-                      onMapCreated: _mapCreated,
-                    ),
-                  );
-                }),
+              future: _getLocation(),
+              builder: (context, snapshot) {
+                return Container(
+                  height: 400,
+                  color: Colors.lightGreen,
+                  child: GoogleMap(
+                    initialCameraPosition:
+                        CameraPosition(target: _currentPosition, zoom: 16.0),
+                    mapType: MapType.normal,
+                    markers: _mapMarker,
+                    myLocationEnabled: true,
+                    onMapCreated: _mapCreated,
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 20),
           ],
         ),
       );
@@ -267,9 +267,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
               child: AutoSizeText(
                 'Anda sedang menuju suatu lokasi..',
                 maxLines: 1,
-                style: TextStyle(
-                    color: Colors.brown[600],
-                    fontSize: 20),
+                style: TextStyle(color: Colors.brown[600], fontSize: 20),
               ),
             ),
             Container(

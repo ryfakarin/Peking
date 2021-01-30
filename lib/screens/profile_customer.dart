@@ -82,13 +82,13 @@ class _customerProfilePageState extends State<customerProfilePage> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text("Log out dari akun anda?"),
+                      title: Text("Log out dari akun anda?", style: TextStyle(color: Colors.white),),
+                      backgroundColor: Colors.yellow[700],
                       actions: <Widget>[
                         FlatButton(
-                          color: Colors.red[100],
                           child: Text(
                             "Kembali",
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: Colors.white),
                           ),
                           onPressed: () {
                             Navigator.pop(context);
@@ -98,10 +98,9 @@ class _customerProfilePageState extends State<customerProfilePage> {
                           width: 20,
                         ),
                         FlatButton(
-                          color: Colors.green[200],
                           child: Text(
                             "Log Out",
-                            style: TextStyle(color: Colors.black),
+                            style: TextStyle(color: Colors.red[800]),
                           ),
                           onPressed: () async {
                             await Provider.of(context).auth.signOut();
@@ -168,7 +167,6 @@ class _customerProfilePageState extends State<customerProfilePage> {
                   Spacer(),
                 ],
               ),
-              SizedBox(height: _height * 0.01),
               Row(
                 children: [
                   Spacer(),

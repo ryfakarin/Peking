@@ -6,6 +6,8 @@ import 'package:hehe/model/panggilan.dart';
 import 'package:hehe/screens/status_history_customer.dart';
 import 'package:hehe/widgets/provider.dart';
 import 'home_customer.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class viewSellerPage extends StatefulWidget {
   final String uidSeller;
@@ -20,10 +22,48 @@ class viewSellerPage extends StatefulWidget {
 class _viewSellerPageState extends State<viewSellerPage> {
   String uidSeller;
   String _namaSeller = "";
+  int _tipeSeller;
 
   Panggilan _panggilan = Panggilan("", "", null);
 
   _viewSellerPageState({this.uidSeller});
+
+  Set<Marker> _mapMarker = {};
+  LatLng _currentPosition = LatLng(0, 0);
+  GoogleMapController _mapController;
+
+  void _mapCreated(controller) {
+    setState(() {
+      _mapController = controller;
+    });
+  }
+
+  _setMarker() async {
+    await Provider.of(context)
+        .db
+        .collection('locData')
+        .document(uidSeller)
+        .get()
+        .then((result) {
+      setState(() {
+        GeoPoint currPos = result.data['location'];
+        _currentPosition = LatLng(currPos.latitude, currPos.longitude);
+      });
+
+      _mapMarker.add(
+        Marker(
+          markerId: MarkerId(_namaSeller),
+          position: _currentPosition,
+          infoWindow: InfoWindow(
+            title: _namaSeller,
+          ),
+        ),
+      );
+
+      _mapController.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: _currentPosition, zoom: 16.0)));
+    });
+  }
 
   _getUser() async {
     var data = await Firestore.instance
@@ -33,6 +73,7 @@ class _viewSellerPageState extends State<viewSellerPage> {
 
     setState(() {
       _namaSeller = data.data['nama'];
+      _tipeSeller = data.data['tipeUser'];
     });
   }
 
@@ -139,14 +180,18 @@ class _viewSellerPageState extends State<viewSellerPage> {
                                 _panggilSeller();
                               },
                               child: AutoSizeText(
-                                'Panggil',
+                                _tipeSeller == 1 ? 'Panggil' : 'Hampiri',
                                 maxLines: 1,
                                 style: TextStyle(color: Colors.white),
                               ),
-                              color: Colors.yellow[800],
+                              color: _tipeSeller == 1
+                                  ? Colors.green[800]
+                                  : Colors.yellow[800],
                               shape: RoundedRectangleBorder(
                                   side: BorderSide(
-                                      color: Colors.yellow[800],
+                                      color: _tipeSeller == 1
+                                          ? Colors.green[800]
+                                          : Colors.yellow[800],
                                       width: 1,
                                       style: BorderStyle.solid),
                                   borderRadius: BorderRadius.circular(10)),
@@ -174,12 +219,34 @@ class _viewSellerPageState extends State<viewSellerPage> {
                             AutoSizeText('Menu',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 24)),
-                            Spacer()
+                            Spacer(),
+                            Container(
+                              color: Colors.pink,
+                              width: 200,
+                              height: 100,
+                              child: FutureBuilder(
+                                  future: _setMarker(),
+                                  builder: (context, snapshot) {
+                                    return GoogleMap(
+                                      initialCameraPosition: CameraPosition(
+                                          target: _currentPosition, zoom: 16.0),
+                                      mapType: MapType.normal,
+                                      markers: _mapMarker,
+                                      onMapCreated: _mapCreated,
+                                      padding: EdgeInsets.only(
+                                        top: 20.0,
+                                      ),
+                                    );
+                                  }),
+                            ),
+                            SizedBox(
+                              width: _width * 0.08,
+                            )
                           ],
                         ),
                         Container(
                           padding: EdgeInsets.only(left: 20, right: 20),
-                          height: _height * 0.4,
+                          height: _height * 0.3,
                           width: _width,
                           child: StreamBuilder(
                             stream: getMenuStreamSnapshots(context),
