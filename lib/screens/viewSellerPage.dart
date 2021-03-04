@@ -70,8 +70,13 @@ class _viewSellerPageState extends State<viewSellerPage> {
         .document(uidSeller)
         .get();
 
+    var second = await Firestore.instance
+        .collection('dataJualan')
+        .document(uidSeller)
+        .get();
+
     setState(() {
-      _namaSeller = data.data['nama'];
+      _namaSeller = second.data['nama'];
       _tipeSeller = data.data['tipeUser'];
     });
   }
@@ -166,17 +171,64 @@ class _viewSellerPageState extends State<viewSellerPage> {
                             SizedBox(
                               width: _width * 0.05,
                             ),
-                            AutoSizeText(
-                              _namaSeller,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 22),
-                              maxLines: 1,
+                            Container(
+                              width: _width * 0.6,
+                              child: AutoSizeText(
+                                _namaSeller,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 22),
+                                maxLines: 2,
+                              ),
                             ),
                             Spacer(),
                             FlatButton(
                               onPressed: () async {
-                                _panggilan.sellerId = uidSeller;
-                                _panggilSeller();
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text(_tipeSeller == 1
+                                        ? "Panggil " + _namaSeller + " ?"
+                                        : "Hampiri " + _namaSeller + " ?"),
+                                    actions: <Widget>[
+                                      FlatButton(
+                                        color: Colors.red[100],
+                                        child: Text(
+                                          "Kembali",
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      FlatButton(
+                                        color: _tipeSeller == 1
+                                            ? Colors.green[100]
+                                            : Colors.yellow[600],
+                                        child: Text(
+                                          _tipeSeller == 1
+                                              ? "Panggil"
+                                              : "Hampiri",
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                        onPressed: () async {
+                                          _panggilan.sellerId = uidSeller;
+                                          _panggilSeller();
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      StatusAndHistoryCust()));
+                                        },
+                                      ),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                    ],
+                                  ),
+                                );
                               },
                               child: AutoSizeText(
                                 _tipeSeller == 1 ? 'Panggil' : 'Hampiri',

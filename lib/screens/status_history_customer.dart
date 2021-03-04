@@ -84,7 +84,7 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
                   children: <Widget>[
                     Padding(padding: EdgeInsets.only(left: 20, bottom: 20)),
                     AutoSizeText(
-                      'Histori Pemanggilan',
+                      'Histori Pesanan',
                       maxLines: 1,
                       style: TextStyle(
                           color: Colors.black,

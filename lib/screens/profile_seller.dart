@@ -8,6 +8,7 @@ import 'package:hehe/screens/updateMenu.dart';
 import 'package:hehe/screens/home_seller.dart';
 import 'package:hehe/widgets/customs.dart';
 import 'package:hehe/widgets/provider.dart';
+import 'package:international_phone_input/international_phone_input.dart';
 
 class sellerProfilePage extends StatefulWidget {
   @override
@@ -15,6 +16,9 @@ class sellerProfilePage extends StatefulWidget {
 }
 
 class _sellerProfilePageState extends State<sellerProfilePage> {
+
+  String phoneNumber;
+
   UserModel _user = UserModel("", "", "", null);
 
   TextEditingController namaUser = TextEditingController();
@@ -43,6 +47,14 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
         .collection('userData')
         .document(uid)
         .setData(_user.toJson());
+  }
+
+  void onPhoneNumberChange(
+      String number, String internationalizedPhoneNumber, String isCode) {
+    setState(() {
+      phoneNumber = internationalizedPhoneNumber;
+      print(phoneNumber);
+    });
   }
 
   @override
@@ -405,8 +417,20 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
                   maxLines: 1,
                   style: TextStyle(fontSize: 16),
                 ),
-                TextField(
-                  controller: inputController,
+                Container(
+                  padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+                  decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.orange[200]),
+                      )),
+                  child: InternationalPhoneInput(
+                      decoration: InputDecoration.collapsed(
+                          hintText: '(813) 555-6167'),
+                      onPhoneNumberChange: onPhoneNumberChange,
+                      initialPhoneNumber: phoneNumber,
+                      initialSelection: 'ID',
+                      enabledCountries: ['+62'],
+                      showCountryFlags: false),
                 ),
                 SizedBox(height: 30),
                 Row(

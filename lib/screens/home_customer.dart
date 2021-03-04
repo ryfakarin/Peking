@@ -109,9 +109,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     var showResult = [];
 
     if (_searchController.text != "") {
-      for(var profile in _allResults){
-        var namaJualan = profileJualan.fromSnapshot(profile).namaJualan.toLowerCase();
-        if(namaJualan.contains(_searchController.text.toLowerCase())){
+      for (var profile in _allResults) {
+        var namaJualan =
+            profileJualan.fromSnapshot(profile).namaJualan.toLowerCase();
+        if (namaJualan.contains(_searchController.text.toLowerCase())) {
           showResult.add(profile);
         }
       }
@@ -347,7 +348,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   }
 
   Widget _buildSellerCard(BuildContext context, DocumentSnapshot document) {
-
     return SingleChildScrollView(
       child: InkWell(
         child: Card(
@@ -412,7 +412,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text("Panggil " + document['nama'] + " ?"),
+                            title: Text(document['tipe'] == 1
+                                ? "Panggil " + document['nama'] + " ?"
+                                : "Hampiri " + document['nama'] + " ?"),
                             actions: <Widget>[
                               FlatButton(
                                 color: Colors.red[100],

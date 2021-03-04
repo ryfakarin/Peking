@@ -145,7 +145,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
                     future: _getDocument(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done) {
-                        if (_jualan.namaJualan == null) {
+                        if (_jualan.namaJualan == "") {
                           return AutoSizeText('Jualan belum memiliki nama');
                         }
                         return Align(

@@ -127,8 +127,9 @@ class _regCustomerPageState extends State<regCustomerPage> {
                           }
                         },
                       );
+                    } else {
+                      warnSnackBar(context, "Kolom harus diisi");
                     }
-                    warnSnackBar(context, "Kolom harus diisi");
                   } on Exception catch (e) {
                     print(e);
                   }

@@ -109,10 +109,12 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   children: <Widget>[
                     Padding(padding: EdgeInsets.only(left: 20, bottom: 20)),
                     AutoSizeText(
-                      'Daftar Pemanggilan',
+                      _user.tipeUser == 1
+                          ? 'Daftar Pemanggilan'
+                          : 'Daftar Penghampiran',
                       maxLines: 1,
                       style: TextStyle(
-                          color: Colors.yellow[800],
+                          color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     )
@@ -318,9 +320,11 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
             );
           },
           child: AutoSizeText(
-            'Terima Panggilan',
+            _user.tipeUser == 1 ?
+            'Terima Panggilan' :
+            'Terima Penghampiran',
             maxLines: 1,
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 12),
           ),
         ),
         Spacer(),
@@ -356,9 +360,11 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
             );
           },
           child: AutoSizeText(
-            'Tolak Panggilan',
+            _user.tipeUser == 1 ?
+            'Tolak Panggilan' :
+            'Tolak Penghampiran',
             maxLines: 1,
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 12),
           ),
         ),
         Spacer(),

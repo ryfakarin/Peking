@@ -4,6 +4,7 @@ import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/login.dart';
 import 'package:hehe/widgets/customs.dart';
 import 'package:hehe/widgets/provider.dart';
+import 'package:international_phone_input/international_phone_input.dart';
 import 'home_customer.dart';
 
 class customerProfilePage extends StatefulWidget {
@@ -12,6 +13,9 @@ class customerProfilePage extends StatefulWidget {
 }
 
 class _customerProfilePageState extends State<customerProfilePage> {
+
+  String phoneNumber;
+
   UserModel _user = UserModel("", "", "", null);
 
   TextEditingController namaUser = TextEditingController();
@@ -40,6 +44,14 @@ class _customerProfilePageState extends State<customerProfilePage> {
         .collection('userData')
         .document(uid)
         .setData(_user.toJson());
+  }
+
+  void onPhoneNumberChange(
+      String number, String internationalizedPhoneNumber, String isCode) {
+    setState(() {
+      phoneNumber = internationalizedPhoneNumber;
+      print(phoneNumber);
+    });
   }
 
   @override
@@ -190,7 +202,7 @@ class _customerProfilePageState extends State<customerProfilePage> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          // return _inputPhoneDialog('Nomor telepon anda', namaUser);
+                          return _inputNewPhoneNumber('Nomor telepon anda', namaUser);
                         },
                       );
                     },
@@ -275,4 +287,87 @@ class _customerProfilePageState extends State<customerProfilePage> {
       ),
     );
   }
+
+  Dialog _inputNewPhoneNumber(
+      String inputTitle, TextEditingController inputController) {
+    return Dialog(
+      child: Container(
+        height: 230,
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: <Widget>[
+            AutoSizeText(
+              inputTitle,
+              maxLines: 1,
+              style: TextStyle(fontSize: 16),
+            ),
+            Container(
+              padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+              decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.orange[200]),
+                  )),
+              child: InternationalPhoneInput(
+                  decoration: InputDecoration.collapsed(
+                      hintText: '(813) 555-6167'),
+                  onPhoneNumberChange: onPhoneNumberChange,
+                  initialPhoneNumber: phoneNumber,
+                  initialSelection: 'ID',
+                  enabledCountries: ['+62'],
+                  showCountryFlags: false),
+            ),
+            SizedBox(height: 30),
+            Row(
+              children: <Widget>[
+                SizedBox(width: 40),
+                RaisedButton(
+                    child: AutoSizeText(
+                      'Batal',
+                      maxLines: 1,
+                      style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey[800]),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    }),
+                SizedBox(width: 20),
+                RaisedButton(
+                  child: AutoSizeText(
+                    'Kirim',
+                    maxLines: 1,
+                    style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[800]),
+                  ),
+                  onPressed: () async {
+                    if (inputController.text == "") {
+                      warnSnackBar(context, "Nomor tidak bisa kosong");
+                    } else {
+                      try {
+                        _user.name = inputController.text;
+                        print(_user.name);
+                        _setDocument(_user.toJson());
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => this.build(context)));
+                        createSnackBar(context, "Berhasil mengganti nama");
+                      } on Exception catch (e) {
+                        print(e);
+                      }
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }
