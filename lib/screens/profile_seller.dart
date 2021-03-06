@@ -408,7 +408,7 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
       child: Stack(
         children: <Widget>[
           Container(
-            height: 200,
+            height: 220,
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: <Widget>[

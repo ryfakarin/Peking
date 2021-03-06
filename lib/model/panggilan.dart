@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Panggilan {
   String sellerId;
   String custId;
@@ -17,4 +19,18 @@ class Panggilan {
     'custId': custId,
     'statusPanggilan' : statusPanggilan,
   };
+}
+
+class UserLocation {
+
+  GeoPoint custLocation;
+  GeoPoint sellerLocation;
+
+  UserLocation(this.custLocation, this.sellerLocation);
+
+  Map<String, dynamic> toJson() => {
+    'custLocation': custLocation,
+    'sellerLocation': sellerLocation,
+  };
+
 }

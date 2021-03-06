@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +17,7 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
+  UserLocation _userLocation = UserLocation(null, null);
   Panggilan _panggilan = Panggilan("", "", null);
   profileJualan jualan = profileJualan("", null);
   Future resultsLoaded;
@@ -73,7 +72,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         target: LatLng(latLng.latitude, latLng.longitude), zoom: 16.0)));
   }
 
-  _setDocument() async {
+  _setLocationDocument() async {
     final uidDoc = await FirebaseAuth.instance.currentUser();
     String uid = uidDoc.uid;
 
@@ -90,7 +89,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
     navigateMap(_currentPosition);
 
-    _setDocument();
+    _setLocationDocument();
   }
 
   getSearchResult() async {
@@ -125,16 +124,23 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     });
   }
 
-  _setData() async {
+  _setPanggilanData() async {
     final custId = await Provider.of(context).auth.getCurrentUID();
     _panggilan.custId = custId;
 
     _panggilan.statusPanggilan = 1;
 
-    await Provider.of(context)
+    DocumentReference docRef = await Provider.of(context)
         .db
         .collection('panggilanData')
         .add(_panggilan.toJson());
+
+    Provider.of(context)
+        .db
+        .collection('panggilanData')
+        .document(docRef.documentID)
+        .collection('userLocation')
+        .add(_userLocation.toJson());
   }
 
   _setMarker() async {
@@ -438,9 +444,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                                   style: TextStyle(color: Colors.black),
                                 ),
                                 onPressed: () async {
+                                  _userLocation.custLocation = GeoPoint(
+                                      _currentPosition.latitude,
+                                      _currentPosition.longitude);
                                   _panggilan.sellerId = document.documentID;
-                                  _setData();
-                                  _setDocument();
+                                  _setPanggilanData();
+                                  _setLocationDocument();
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(

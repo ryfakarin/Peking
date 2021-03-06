@@ -33,7 +33,6 @@ class _updateMenuPageState extends State<updateMenuPage> {
 
   _setDocument(String namaJualan) async {
     final uid = await Provider.of(context).auth.getCurrentUID();
-    String docId;
     int tipe;
 
     await Provider.of(context)

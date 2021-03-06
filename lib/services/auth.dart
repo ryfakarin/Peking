@@ -226,6 +226,78 @@ class AuthService {
     );
   }
 
+  // update user phone number
+  // Future updateUserPhone(String phone, BuildContext context) {
+  //   _auth.verifyPhoneNumber(
+  //       phoneNumber: phone,
+  //       timeout: Duration(seconds: 0),
+  //       verificationCompleted: null,
+  //       verificationFailed: null,
+  //       codeSent: (verificationId, [forceResendingToken]) {
+  //         final _codeController = TextEditingController();
+  //         showDialog(
+  //           context: context,
+  //           barrierDismissible: false,
+  //           builder: (context) => AlertDialog(
+  //             title: Text("Kode Verifikasi Anda"),
+  //             content: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: <Widget>[
+  //                 TextField(
+  //                   keyboardType: TextInputType.number,
+  //                   inputFormatters: <TextInputFormatter>[
+  //                     FilteringTextInputFormatter.digitsOnly
+  //                   ],
+  //                   controller: _codeController,
+  //                 )
+  //               ],
+  //             ),
+  //             actions: <Widget>[
+  //               FlatButton(
+  //                 color: Colors.red[100],
+  //                 child: Text(
+  //                   "Kembali",
+  //                   style: TextStyle(color: Colors.black),
+  //                 ),
+  //                 onPressed: () {
+  //                   Navigator.pop(context);
+  //                 },
+  //               ),
+  //               SizedBox(
+  //                 width: 30,
+  //               ),
+  //               FlatButton(
+  //                 color: Colors.lightGreen,
+  //                 child: Text("Submit"),
+  //                 textColor: Colors.white,
+  //                 onPressed: () {
+  //                   final AuthCredential credential = PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: _codeController.text.trim());
+  //                     //FirebaseAuth.instance.currentUser()).updatePhoneNumberCredential(credential);
+  //                   var _credential = PhoneAuthProvider.getCredential(
+  //                       verificationId: verificationId,
+  //                       smsCode: _codeController.text.trim());
+  //                   // _auth.(_credential).then(
+  //                   //       (AuthResult result) async {
+  //                   //     navigateUser(phone, context);
+  //                   //     Navigator.pop(context);
+  //                   //   },
+  //                   // ).catchError(
+  //                   //       (e) {
+  //                   //     print("error");
+  //                   //   },
+  //                   // );
+  //                 },
+  //               ),
+  //               SizedBox(
+  //                 width: 30,
+  //               ),
+  //             ],
+  //           ),
+  //         );
+  //       },
+  //       codeAutoRetrievalTimeout: null);
+  // }
+
   // sign out
   Future signOut() async {
     await _auth.signOut();
