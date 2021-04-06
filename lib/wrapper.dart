@@ -24,10 +24,13 @@ class Wrapper extends StatelessWidget {
               future: getData(snapshot.data, context),
               builder: (BuildContext ctx, snapshot) {
                 if (tipeUser == 0) {
+                  FocusScope.of(context).unfocus();
                   return CustomerHomePage();
                 } else if (tipeUser == 1) {
+                  FocusScope.of(context).unfocus();
                   return SellerHomePage();
                 } else if (tipeUser == 2)  {
+                  FocusScope.of(context).unfocus();
                   return SellerStayHomePage();
                 }
                 return LoginPage();

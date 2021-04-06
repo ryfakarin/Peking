@@ -54,7 +54,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => customerProfilePage()));
-                  } else if (_user.tipeUser != 0) {
+                  } else {
                     Navigator.push(
                         context,
                         MaterialPageRoute(

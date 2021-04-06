@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:hehe/model/user.dart';
 import 'package:hehe/widgets/customs.dart';
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:hehe/widgets/provider.dart';

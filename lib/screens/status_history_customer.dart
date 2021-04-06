@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hehe/model/panggilan.dart';
-import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_customer.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hehe/screens/profile_customer.dart';
 import 'package:hehe/widgets/provider.dart';
@@ -15,14 +15,22 @@ class StatusAndHistoryCust extends StatefulWidget {
 }
 
 class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
-  DateTime nowTime = DateTime.now();
+  Future locationGetter;
+  String docId;
+  String docIdLoc;
+  UserLocation _userLocation = UserLocation(null, null);
 
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
 
-  UserModel _seller = UserModel("", "", "", null);
   Panggilan _panggilan = Panggilan("", "", null);
+
+  @override
+  initState() {
+    super.initState();
+    locationGetter = _getLocation(docId);
+  }
 
   _mapCreated(controller) {
     setState(() {
@@ -134,19 +142,54 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         .snapshots();
   }
 
-  _getSeller(DocumentSnapshot document) async {
+  _getLocation(String docId) async {
+    Position currPos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
-    await Provider.of(context)
-        .db
-        .collection('userData')
-        .document(document['sellerId'])
-        .get()
-        .then((result) {
-      _seller.phoneNumber = result.data['phoneNumber'];
-      _seller.name = result.data['nama'];
-      _seller.uid = document['sellerId'];
-      _seller.tipeUser = result.data['tipeUser'];
+    _mapMarker.add(Marker(
+      markerId: MarkerId(docId),
+      position: LatLng(-6.2878056811162155, 106.75716179652231),
+    ));
+
+    setState(() {
+      _userLocation.custLocation =
+          GeoPoint(currPos.latitude, currPos.longitude);
     });
+
+    // await _getLocationData(docId);
+  }
+
+  _getLocationData(String docId) async {
+    await Firestore.instance
+        .collection('panggilanData')
+        .document(docId)
+        .collection('userLocation')
+        .getDocuments()
+        .then(
+          (value) => setState(
+            () {
+              docIdLoc = value.documents.first.documentID;
+              print(docId);
+              _userLocation.sellerLocation =
+                  value.documents.first.data['sellerLocation'];
+              _mapMarker.add(
+                Marker(
+                  markerId: MarkerId(docId),
+                  position: LatLng(_userLocation.sellerLocation.latitude,
+                      _userLocation.sellerLocation.longitude),
+                  infoWindow: InfoWindow(
+                    title: docId,
+                  ),
+                ),
+              );
+              _mapController.animateCamera(CameraUpdate.newCameraPosition(
+                  CameraPosition(
+                      target: LatLng(_userLocation.sellerLocation.latitude,
+                          _userLocation.sellerLocation.longitude),
+                      zoom: 16.0)));
+            },
+          ),
+        );
   }
 
   _setData(String docId, Map<String, dynamic> json) async {
@@ -157,22 +200,23 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         .setData(json);
   }
 
-  _setTime(String docId, int status) async {
-    String ts = Timestamp.now().toString();
-    await Provider.of(context)
-        .db
-        .collection('panggilanData')
-        .document(docId)
-        .setData({status: ts});
-  }
-
-  void toBeSendtoDb(DocumentSnapshot document, int status) {
+  void toBeSendtoDb(
+      DocumentSnapshot document, int status, bool updateLocation) {
     String docId = document.documentID;
     _panggilan.custId = document['custId'];
     _panggilan.sellerId = document['sellerId'];
     _panggilan.statusPanggilan = status;
     _setData(docId, _panggilan.toJson());
-    _setTime(docId, status);
+
+    if (updateLocation == true) {
+      Provider.of(context)
+          .db
+          .collection('panggilanData')
+          .document(docId)
+          .collection('userLocation')
+          .document(docIdLoc)
+          .setData(_userLocation.toJson());
+    }
   }
 
   Widget _buildStatusCards(BuildContext context, DocumentSnapshot document) {
@@ -183,62 +227,57 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         margin: EdgeInsets.all(10.0),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ExpansionTile(
-            title: FutureBuilder(
-                future: Firestore.instance
-                    .collection('dataJualan')
-                    .document(document.data['sellerId'])
-                    .get(),
-                builder: (context, sn) {
-                  if (!sn.hasData)
-                    return Row(children: <Widget>[
-                      Spacer(),
-                      AutoSizeText('Tidak ada data yang tersedia'),
-                      Spacer(),
-                    ]);
-                  return Container(
-                    width: 200,
-                    child: Row(
-                      children: <Widget>[
-                        Container(
-                          width: 170,
-                          child: AutoSizeText(
-                            sn.data['nama'],
-                            maxLines: 2,
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        Spacer(),
-                        document.data['statusPanggilan'] != 4 &&
-                                document.data['statusPanggilan'] != 6
-                            ? AutoSizeText('Proses',
-                                maxLines: 1,
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.green[800], fontWeight: FontWeight.w400))
-                            : AutoSizeText('Selesai',
-                                maxLines: 1,
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.grey[700], fontWeight: FontWeight.w400))
-                        // Container(
-                        //   child: AutoSizeText(
-                        //     DateTime.now().toString().substring(10, 16),
-                        //     maxLines: 1,
-                        //     style: TextStyle(fontSize: 14, color: Colors.green[800]),
-                        //   ),
-                        // ),
-                      ],
+          child: FutureBuilder(
+            future: Firestore.instance
+                .collection('dataJualan')
+                .document(document.data['sellerId'])
+                .get(),
+            builder: (context, AsyncSnapshot sn) {
+              if (!sn.hasData)
+                return Row(children: <Widget>[
+                  Spacer(),
+                  AutoSizeText('Tidak ada data yang tersedia'),
+                  Spacer(),
+                ]);
+              return ExpansionTile(
+                title: Row(
+                  children: <Widget>[
+                    Container(
+                      width: 170,
+                      child: AutoSizeText(
+                        sn.data['nama'],
+                        maxLines: 2,
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
                     ),
-                  );
-                }),
-            children: <Widget>[
-              _buildCard1(document),
-              _buildTolakPanggilan(document),
-              _buildTerimaPanggilan(document),
-              _buildCustBerangkat(document),
-              _buildPenjualTravel(document),
-              _buildPanggilanSelesai(document),
-            ],
+                    Spacer(),
+                    document.data['statusPanggilan'] != 4 &&
+                            document.data['statusPanggilan'] != 6
+                        ? AutoSizeText('Proses',
+                            maxLines: 1,
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.green[800],
+                                fontWeight: FontWeight.w400))
+                        : AutoSizeText('Selesai',
+                            maxLines: 1,
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w400))
+                  ],
+                ),
+                children: <Widget>[
+                  _buildCard1(document),
+                  _buildTolakPanggilan(document),
+                  _buildTerimaPanggilan(document),
+                  _buildCustBerangkat(sn, document),
+                  _buildPenjualTravel(sn, document),
+                  _buildPanggilanSelesai(sn, document),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -311,23 +350,20 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
           );
   }
 
-  Widget _buildCustBerangkat(DocumentSnapshot document) {
+  Widget _buildCustBerangkat(AsyncSnapshot sn, DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 && document['statusPanggilan'] != 6
-        ? FutureBuilder(
-            future: _getSeller(document),
-            builder: (context, snapshot) {
-              if (_seller.tipeUser == 2) {
-                return ExpansionTile(
-                  title: AutoSizeText(
-                    'Pembeli akan berangkat',
-                    maxLines: 1,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  children: <Widget>[
+        ? sn.data['tipe'] == 2
+            ? ExpansionTile(
+                title: AutoSizeText(
+                  'Pembeli akan berangkat',
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 14),
+                ),
+                children: <Widget>[
                     document['statusPanggilan'] == 2
                         ? FlatButton(
                             onPressed: () {
-                              toBeSendtoDb(document, 3);
+                              toBeSendtoDb(document, 3, true);
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -347,49 +383,64 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
                               color: Colors.green,
                             ),
                           ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                );
-              } else {
-                return Padding(padding: EdgeInsets.zero);
-              }
-            },
-          )
+                  ])
+            : SizedBox(
+                height: 10,
+              )
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget _buildPenjualTravel(DocumentSnapshot document) {
+  Widget _buildPenjualTravel(AsyncSnapshot sn, DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 &&
             document['statusPanggilan'] != 6 &&
             document['statusPanggilan'] != 2
         ? ExpansionTile(
             title: AutoSizeText(
-              _seller.tipeUser == 1
+              sn.data['tipe'] == 1
                   ? 'Penjual dalam perjalanan'
                   : 'Anda dalam perjalanan',
               maxLines: 1,
               style: TextStyle(fontSize: 14),
             ),
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(left: 20, right: 20),
-                height: 350,
-                color: Colors.lightGreen,
-                child: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: _currentPosition, zoom: 14.0),
-                  mapType: MapType.normal,
-                  markers: _mapMarker,
-                  myLocationEnabled: true,
-                  onMapCreated: _mapCreated,
-                ),
+              Column(
+                children: <Widget>[
+                  document['statusPanggilan'] != 4
+                      ? FutureBuilder(
+                          future: _getLocation(sn.data['sellerId']),
+                          builder: (context, doc) {
+                            return Container(
+                              margin: EdgeInsets.only(left: 20, right: 20),
+                              height: 350,
+                              color: Colors.lightGreen,
+                              child: GoogleMap(
+                                initialCameraPosition: CameraPosition(
+                                    target: LatLng(
+                                        _userLocation.custLocation.latitude,
+                                        _userLocation.custLocation.longitude),
+                                    zoom: 16.0),
+                                mapType: MapType.normal,
+                                markers: _mapMarker,
+                                myLocationEnabled: true,
+                                onMapCreated: _mapCreated,
+                              ),
+                            );
+                          })
+                      : Center(
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.green,
+                          ),
+                        ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ],
               ),
-              _seller.tipeUser == 2 || document['statusPanggilan'] == 3
+              sn.data['tipe'] == 2 || document['statusPanggilan'] == 3
                   ? FlatButton(
                       onPressed: () {
-                        toBeSendtoDb(document, 4);
+                        toBeSendtoDb(document, 4, true);
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -408,10 +459,11 @@ class _StatusAndHistoryCustState extends State<StatusAndHistoryCust> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget _buildPanggilanSelesai(DocumentSnapshot document) {
+  Widget _buildPanggilanSelesai(AsyncSnapshot sn, DocumentSnapshot document) {
     return document['statusPanggilan'] == 4
         ? Card(
             child: Container(
+              color: Colors.green[50],
               padding: EdgeInsets.all(15),
               child: Row(
                 children: <Widget>[

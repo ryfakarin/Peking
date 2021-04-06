@@ -36,14 +36,17 @@ class AuthService {
       verificationCompleted: (AuthCredential authCredential) {
         _auth.signInWithCredential(authCredential).then((AuthResult result) {
           if (tipeUser == 0) {
+            FocusScope.of(context).unfocus();
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => CustomerHomePage()));
             Navigator.pop(context);
           } else if (tipeUser == 1) {
+            FocusScope.of(context).unfocus();
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SellerHomePage()));
             Navigator.pop(context);
           } else {
+            FocusScope.of(context).unfocus();
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SellerStayHomePage()));
 
@@ -93,6 +96,7 @@ class AuthService {
                 child: Text("Submit"),
                 textColor: Colors.white,
                 onPressed: () {
+                  FocusScope.of(context).unfocus();
                   var _credential = PhoneAuthProvider.getCredential(
                       verificationId: verificationId,
                       smsCode: _codeController.text.trim());
@@ -196,6 +200,7 @@ class AuthService {
                 child: Text("Submit"),
                 textColor: Colors.white,
                 onPressed: () {
+                  FocusScope.of(context).unfocus();
                   var _credential = PhoneAuthProvider.getCredential(
                       verificationId: verificationId,
                       smsCode: _codeController.text.trim());
@@ -304,6 +309,7 @@ class AuthService {
   }
 
   void navigateUser(String phoneNumber, BuildContext context) async {
+    FocusScope.of(context).unfocus();
     await db
         .collection('userData')
         .where('phoneNumber', isEqualTo: phoneNumber)

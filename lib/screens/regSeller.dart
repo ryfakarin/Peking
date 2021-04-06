@@ -66,7 +66,7 @@ class _regSellerPageState extends State<regSellerPage> {
                                 builder: (BuildContext context) => CustomDialog(
                                   title: "Anda memilih tipe berdagang keliling",
                                   description:
-                                      "Anda berpindah-pindah saat berdagang. Pembeli dapat memanggil anda berdasarkan lokasi anda berhjualan. Pilihan ini tidak dapat diubah.",
+                                      "Anda berpindah-pindah saat berdagang. Pembeli dapat memanggil anda berdasarkan lokasi anda berjualan. Pilihan ini tidak dapat diubah.",
                                   primaryButtonText: "OK",
                                   primaryButtonRoute: "",
                                 ),
@@ -88,7 +88,7 @@ class _regSellerPageState extends State<regSellerPage> {
                                 builder: (BuildContext context) => CustomDialog(
                                   title: "Anda memilih tipe berdagang menetap",
                                   description:
-                                      "Anda tidak berpindah-pindah saat berdagang. Pembeli tidak dapat memanggil anda, hanya dapat mengetahui lokasi anda berhjualan. Pilihan ini tidak dapat diubah.",
+                                      "Anda tidak berpindah-pindah saat berdagang. Pembeli tidak dapat memanggil anda, hanya dapat mengetahui lokasi anda berjualan. Pilihan ini tidak dapat diubah.",
                                   primaryButtonText: "OK",
                                   primaryButtonRoute: "",
                                 ),

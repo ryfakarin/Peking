@@ -7,7 +7,7 @@ import 'package:hehe/model/user.dart';
 import 'package:hehe/screens/home_seller.dart';
 import 'package:hehe/screens/profile_seller.dart';
 import 'package:hehe/widgets/provider.dart';
-
+import 'package:geolocator/geolocator.dart';
 import 'home_seller_menetap.dart';
 
 class statusAndHistorySeller extends StatefulWidget {
@@ -16,12 +16,23 @@ class statusAndHistorySeller extends StatefulWidget {
 }
 
 class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
+  Future locationGetter;
+  String docId;
+  String docIdLoc;
+  UserLocation _userLocation = UserLocation(null, null);
+
   GoogleMapController _mapController;
   LatLng _currentPosition = LatLng(-7.8032076, 110.3573354);
   final Set<Marker> _mapMarker = {};
 
   UserModel _user = UserModel("", "", "", null);
   Panggilan _panggilan = Panggilan("", "", null);
+
+  @override
+  initState() {
+    super.initState();
+    locationGetter = _getLocation(docId);
+  }
 
   _getDocument() async {
     final uid = await Provider.of(context).auth.getCurrentUID();
@@ -32,10 +43,12 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         .document(uid)
         .get()
         .then((result) {
-      _user.phoneNumber = result.data['phoneNumber'];
-      _user.name = result.data['nama'];
-      _user.uid = uid;
-      _user.tipeUser = result.data['tipeUser'];
+      setState(() {
+        _user.phoneNumber = result.data['phoneNumber'];
+        _user.name = result.data['nama'];
+        _user.uid = uid;
+        _user.tipeUser = result.data['tipeUser'];
+      });
     });
   }
 
@@ -164,6 +177,51 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         .snapshots();
   }
 
+  _getLocation(String docId) async {
+    Position currPos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    setState(() {
+      _userLocation.sellerLocation =
+          GeoPoint(currPos.latitude, currPos.longitude);
+    });
+
+    await _getLocationData(docId);
+  }
+
+  _getLocationData(String docId) async {
+    await Firestore.instance
+        .collection('panggilanData')
+        .document(docId)
+        .collection('userLocation')
+        .getDocuments()
+        .then(
+          (value) => setState(
+            () {
+              docIdLoc = value.documents.first.documentID;
+              print(value.documents.first.documentID);
+              _userLocation.custLocation =
+                  value.documents.first.data['custLocation'];
+              _mapMarker.add(
+                Marker(
+                  markerId: MarkerId(docId),
+                  position: LatLng(_userLocation.custLocation.latitude,
+                      _userLocation.custLocation.longitude),
+                  infoWindow: InfoWindow(
+                    title: docId,
+                  ),
+                ),
+              );
+              _mapController.animateCamera(CameraUpdate.newCameraPosition(
+                  CameraPosition(
+                      target: LatLng(_userLocation.custLocation.latitude,
+                          _userLocation.custLocation.longitude),
+                      zoom: 16.0)));
+            },
+          ),
+        );
+  }
+
   _setData(String docId, Map<String, dynamic> json) async {
     await Provider.of(context)
         .db
@@ -172,21 +230,23 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         .setData(json);
   }
 
-  _setTime(String docId, int status) async {
-    await Provider.of(context)
-        .db
-        .collection('panggilanData')
-        .document(docId)
-        .setData({status: Timestamp.now()});
-  }
-
-  void toBeSendtoDb(DocumentSnapshot document, int status) {
+  void toBeSendtoDb(
+      DocumentSnapshot document, int status, bool updateLocation) {
     String docId = document.documentID;
     _panggilan.custId = document['custId'];
     _panggilan.sellerId = document['sellerId'];
     _panggilan.statusPanggilan = status;
     _setData(docId, _panggilan.toJson());
-    _setTime(docId, status);
+
+    if (updateLocation == true) {
+      Provider.of(context)
+          .db
+          .collection('panggilanData')
+          .document(docId)
+          .collection('userLocation')
+          .document(docIdLoc)
+          .setData(_userLocation.toJson());
+    }
   }
 
   _buildStatusCards(BuildContext context, DocumentSnapshot document) {
@@ -196,95 +256,105 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
       margin: EdgeInsets.all(10.0),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ExpansionTile(
-          title: FutureBuilder(
-              future: Firestore.instance
-                  .collection('userData')
-                  .document(document['custId'])
-                  .get(),
-              builder: (context, sn) {
-                if (!sn.hasData)
-                  return Row(children: <Widget>[
-                    Spacer(),
-                    AutoSizeText('Tidak ada data yang tersedia'),
-                    Spacer(),
-                  ]);
-                return Container(
-                  width: 200,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        width: 170,
-                        child: AutoSizeText(
-                          sn.data['nama'],
-                          maxLines: 2,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+        child: FutureBuilder(
+          future: Firestore.instance
+              .collection('userData')
+              .document(document['custId'])
+              .get(),
+          builder: (context, sn) {
+            if (!sn.hasData)
+              return Row(children: <Widget>[
+                Spacer(),
+                AutoSizeText('Tidak ada data yang tersedia'),
+                Spacer(),
+              ]);
+            return ExpansionTile(
+              title: Row(
+                children: <Widget>[
+                  Container(
+                    width: 170,
+                    child: AutoSizeText(
+                      sn.data['nama'],
+                      maxLines: 2,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
-                      Spacer(),
-                      document.data['statusPanggilan'] != 4 &&
-                              document.data['statusPanggilan'] != 6
-                          ? AutoSizeText('Proses',
-                              maxLines: 1,
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.green[800],
-                                  fontWeight: FontWeight.w400))
-                          : AutoSizeText('Selesai',
-                              maxLines: 1,
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[700],
-                                  fontWeight: FontWeight.w400))
-                    ],
+                    ),
                   ),
-                );
-              }),
-          children: <Widget>[
-            _buildRow1(document),
-            _buildTolakPanggilan(document),
-            _buildSellerBerangkat(document),
-            _buildSellerPerjalanan(document),
-            _buildPanggilanSelesai(document)
-          ],
+                  Spacer(),
+                  document.data['statusPanggilan'] != 4 &&
+                          document.data['statusPanggilan'] != 6
+                      ? AutoSizeText('Proses',
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.green[800],
+                              fontWeight: FontWeight.w400))
+                      : AutoSizeText('Selesai',
+                          maxLines: 1,
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w400))
+                ],
+              ),
+              children: <Widget>[
+                _buildRow1(sn, document),
+                _buildTolakPanggilan(sn, document),
+                _buildSellerBerangkat(sn, document),
+                _buildSellerPerjalanan(sn, document),
+                _buildPanggilanSelesai(document)
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildRow1(DocumentSnapshot document) {
+  Widget _buildRow1(AsyncSnapshot sn, DocumentSnapshot document) {
     return ExpansionTile(
       title: AutoSizeText(
-        'Konfirmasi pemanggilan',
+        _user.tipeUser == 1
+            ? 'Konfirmasi pemanggilan'
+            : 'Konfirmasi penghampiran',
         maxLines: 1,
         style: TextStyle(fontSize: 14),
       ),
       children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(left: 20, right: 20),
-          height: 350,
-          color: Colors.lightGreen,
-          child: GoogleMap(
-            initialCameraPosition:
-                CameraPosition(target: _currentPosition, zoom: 14.0),
-            mapType: MapType.normal,
-            markers: _mapMarker,
-            myLocationEnabled: true,
-            onMapCreated: _mapCreated,
-          ),
-        ),
+        document['statusPanggilan'] == 1
+            ? FutureBuilder(
+                future: _getLocation(document.documentID),
+                builder: (context, doc) {
+                  return Container(
+                    margin: EdgeInsets.only(left: 20, right: 20),
+                    height: 350,
+                    color: Colors.lightGreen,
+                    child: GoogleMap(
+                      initialCameraPosition:
+                          CameraPosition(target: _currentPosition, zoom: 14.0),
+                      mapType: MapType.normal,
+                      markers: _mapMarker,
+                      myLocationEnabled: true,
+                      onMapCreated: _mapCreated,
+                    ),
+                  );
+                },
+              )
+            : Icon(
+                Icons.check,
+                color: Colors.green,
+              ),
         SizedBox(height: 10),
         document['statusPanggilan'] == 1
-            ? _buildButtonTerimaPanggilan(document)
+            ? _buildButtonTerimaPanggilan(sn, document)
             : Padding(padding: EdgeInsets.zero),
       ],
     );
   }
 
-  Row _buildButtonTerimaPanggilan(DocumentSnapshot document) {
+  Row _buildButtonTerimaPanggilan(AsyncSnapshot sn, DocumentSnapshot document) {
     return Row(
       children: <Widget>[
         Spacer(),
@@ -307,7 +377,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   FlatButton(
                     child: Text("Terima"),
                     onPressed: () {
-                      toBeSendtoDb(document, 2);
+                      toBeSendtoDb(document, 2, true);
                       Navigator.of(context).pop();
                       Navigator.push(
                           context,
@@ -320,9 +390,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
             );
           },
           child: AutoSizeText(
-            _user.tipeUser == 1 ?
-            'Terima Panggilan' :
-            'Terima Penghampiran',
+            _user.tipeUser == 1 ? 'Terima Panggilan' : 'Terima Penghampiran',
             maxLines: 1,
             style: TextStyle(fontSize: 12),
           ),
@@ -347,7 +415,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   FlatButton(
                     child: Text("Tolak"),
                     onPressed: () {
-                      toBeSendtoDb(document, 6);
+                      toBeSendtoDb(document, 6, false);
                       Navigator.of(context).pop();
                       Navigator.push(
                           context,
@@ -360,9 +428,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
             );
           },
           child: AutoSizeText(
-            _user.tipeUser == 1 ?
-            'Tolak Panggilan' :
-            'Tolak Penghampiran',
+            _user.tipeUser == 1 ? 'Tolak Panggilan' : 'Tolak Penghampiran',
             maxLines: 1,
             style: TextStyle(fontSize: 12),
           ),
@@ -372,12 +438,9 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
     );
   }
 
-  Widget _buildTolakPanggilan(DocumentSnapshot document) {
+  Widget _buildTolakPanggilan(AsyncSnapshot sn, DocumentSnapshot document) {
     return document['statusPanggilan'] != 6
-        ? Padding(
-            padding: EdgeInsets.zero,
-          )
-        : Card(
+        ? Card(
             child: Container(
               color: Colors.red[50],
               padding: EdgeInsets.all(15),
@@ -386,17 +449,20 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   AutoSizeText(
                     _user.tipeUser == 1
                         ? 'Anda menolak pemanggilan ini'
-                        : 'Pembeli tidak menjadi membeli',
+                        : 'Anda menolak penghampiri pembeli ini',
                     maxLines: 1,
                     style: TextStyle(fontSize: 14),
                   )
                 ],
               ),
             ),
+          )
+        : Padding(
+            padding: EdgeInsets.zero,
           );
   }
 
-  Widget _buildSellerBerangkat(DocumentSnapshot document) {
+  Widget _buildSellerBerangkat(AsyncSnapshot sn, DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 && document['statusPanggilan'] != 6
         ? _user.tipeUser == 1
             ? ExpansionTile(
@@ -407,20 +473,28 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                 ),
                 children: <Widget>[
                   document['statusPanggilan'] == 2
-                      ? FlatButton(
-                          onPressed: () {
-                            toBeSendtoDb(document, 3);
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => this.build(context)));
-                          },
-                          color: Colors.green[100],
-                          child: AutoSizeText(
-                            'Saya berangkat',
-                            maxLines: 1,
-                            style: TextStyle(fontSize: 14),
-                          ),
+                      ? Column(
+                          children: <Widget>[
+                            FutureBuilder(
+                                future: _getLocation(document.documentID),
+                                builder: (context, doc) {
+                                  return FlatButton(
+                                      onPressed: () {
+                                        toBeSendtoDb(document, 3, true);
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    this.build(context)));
+                                      },
+                                      color: Colors.green[100],
+                                      child: AutoSizeText(
+                                        'Saya berangkat',
+                                        maxLines: 1,
+                                        style: TextStyle(fontSize: 14),
+                                      ));
+                                })
+                          ],
                         )
                       : Center(
                           child: Icon(
@@ -440,7 +514,9 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   child: Row(
                     children: <Widget>[
                       AutoSizeText(
-                        'Menunggu pembeli berangkat',
+                        _user.tipeUser == 1
+                            ? 'Anda menerima panggilan ini'
+                            : 'Menunggu pembeli berangkat',
                         maxLines: 1,
                         style: TextStyle(fontSize: 14),
                       )
@@ -451,7 +527,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
         : Padding(padding: EdgeInsets.zero);
   }
 
-  Widget _buildSellerPerjalanan(DocumentSnapshot document) {
+  Widget _buildSellerPerjalanan(AsyncSnapshot sn, DocumentSnapshot document) {
     return document['statusPanggilan'] != 1 &&
             document['statusPanggilan'] != 2 &&
             document['statusPanggilan'] != 6
@@ -463,18 +539,23 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   style: TextStyle(fontSize: 14),
                 ),
                 children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 20, right: 20),
-                    height: 350,
-                    color: Colors.lightGreen,
-                    child: GoogleMap(
-                      initialCameraPosition:
-                          CameraPosition(target: _currentPosition, zoom: 14.0),
-                      mapType: MapType.normal,
-                      markers: _mapMarker,
-                      myLocationEnabled: true,
-                      onMapCreated: _mapCreated,
-                    ),
+                  FutureBuilder(
+                    future: _getLocation(document.documentID),
+                    builder: (context, doc) {
+                      return Container(
+                        margin: EdgeInsets.only(left: 20, right: 20),
+                        height: 350,
+                        color: Colors.lightGreen,
+                        child: GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                              target: _currentPosition, zoom: 14.0),
+                          mapType: MapType.normal,
+                          markers: _mapMarker,
+                          myLocationEnabled: true,
+                          onMapCreated: _mapCreated,
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(
                     height: 5,
@@ -482,7 +563,7 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   document['statusPanggilan'] == 3
                       ? FlatButton(
                           onPressed: () {
-                            toBeSendtoDb(document, 4);
+                            toBeSendtoDb(document, 4, true);
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -505,19 +586,29 @@ class _statusAndHistorySellerState extends State<statusAndHistorySeller> {
                   style: TextStyle(fontSize: 14),
                 ),
                 children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 20, right: 20),
-                    height: 350,
-                    color: Colors.lightGreen,
-                    child: GoogleMap(
-                      initialCameraPosition:
-                          CameraPosition(target: _currentPosition, zoom: 14.0),
-                      mapType: MapType.normal,
-                      markers: _mapMarker,
-                      myLocationEnabled: true,
-                      onMapCreated: _mapCreated,
-                    ),
-                  ),
+                  document['statusPanggilan'] == 4
+                      ? Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        )
+                      : FutureBuilder(
+                          future: _getLocation(document.documentID),
+                          builder: (context, doc) {
+                            return Container(
+                              margin: EdgeInsets.only(left: 20, right: 20),
+                              height: 350,
+                              color: Colors.lightGreen,
+                              child: GoogleMap(
+                                initialCameraPosition: CameraPosition(
+                                    target: _currentPosition, zoom: 14.0),
+                                mapType: MapType.normal,
+                                markers: _mapMarker,
+                                myLocationEnabled: true,
+                                onMapCreated: _mapCreated,
+                              ),
+                            );
+                          },
+                        ),
                 ],
               )
         : Padding(padding: EdgeInsets.zero);

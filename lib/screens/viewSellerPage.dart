@@ -23,6 +23,7 @@ class _viewSellerPageState extends State<viewSellerPage> {
   String _namaSeller = "";
   int _tipeSeller;
 
+  UserLocation _userLocation = UserLocation(null, null);
   Panggilan _panggilan = Panggilan("", "", null);
 
   _viewSellerPageState({this.uidSeller});
@@ -87,10 +88,17 @@ class _viewSellerPageState extends State<viewSellerPage> {
 
     _panggilan.statusPanggilan = 1;
 
-    await Provider.of(context)
+    DocumentReference docRef = await Provider.of(context)
         .db
         .collection('panggilanData')
         .add(_panggilan.toJson());
+
+    Provider.of(context)
+        .db
+        .collection('panggilanData')
+        .document(docRef.documentID)
+        .collection('userLocation')
+        .add(_userLocation.toJson());
 
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => StatusAndHistoryCust()));
@@ -214,6 +222,9 @@ class _viewSellerPageState extends State<viewSellerPage> {
                                           style: TextStyle(color: Colors.black),
                                         ),
                                         onPressed: () async {
+                                          _userLocation.custLocation = GeoPoint(
+                                              _currentPosition.latitude,
+                                              _currentPosition.longitude);
                                           _panggilan.sellerId = uidSeller;
                                           _panggilSeller();
                                           Navigator.push(

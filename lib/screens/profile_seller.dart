@@ -71,7 +71,7 @@ class _sellerProfilePageState extends State<sellerProfilePage> {
           Row(
             children: [
               IconButton(
-                padding: EdgeInsets.only(right: _width * 0.55),
+                padding: EdgeInsets.only(right: _width * 0.6),
                 icon: Icon(
                   Icons.arrow_back,
                   size: 28.0,

@@ -325,6 +325,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                             icon: Icon(Icons.clear),
                             color: Colors.lightGreen,
                             onPressed: () {
+                              FocusScope.of(context);
                               _searchController.clear();
                             },
                           ),

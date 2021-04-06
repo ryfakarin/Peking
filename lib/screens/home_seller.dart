@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hehe/screens/status_history_seller.dart';
 import 'package:hehe/widgets/provider.dart';
+import 'package:hehe/widgets/customs.dart';
 
 class SellerHomePage extends StatefulWidget {
   @override
@@ -180,6 +181,7 @@ class _SellerHomePageState extends State<SellerHomePage> {
                             color: _iconTravelColor,
                             onPressed: () {
                               setState(() {
+                                // warnSnackBar(context, 'Anda harus berjualan sebelum melakukan perjalanan');
                                 _iconOutColor = _iconNotColor;
                                 _iconInColor = _iconNotColor;
                                 _iconTravelColor = _iconClickColor;

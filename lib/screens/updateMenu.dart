@@ -347,6 +347,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
                 ),
                 TextField(
                   controller: hargaController,
+                    keyboardType: TextInputType.number,
                 ),
                 SizedBox(
                   height: 20,
@@ -378,6 +379,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
                             color: Colors.grey[800]),
                       ),
                       onPressed: () async {
+                        FocusScope.of(context).requestFocus(FocusNode());
                         if (namaMenuController.text == "") {
                           warnSnackBar(context, "Nama tidak bisa kosong");
                         } else if (hargaController.text == "") {
@@ -484,6 +486,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
                             color: Colors.grey[800]),
                       ),
                       onPressed: () async {
+                        FocusScope.of(context).requestFocus(FocusNode());
                         if (namaMenuController.text == "") {
                           warnSnackBar(context, "Nama tidak bisa kosong");
                         } else if (hargaController.text == "") {
@@ -560,6 +563,7 @@ class _updateMenuPageState extends State<updateMenuPage> {
                             color: Colors.grey[800]),
                       ),
                       onPressed: () async {
+                        FocusScope.of(context).requestFocus(FocusNode());
                         if (inputController.text == "") {
                           warnSnackBar(context, "Nama tidak bisa kosong");
                         } else {
